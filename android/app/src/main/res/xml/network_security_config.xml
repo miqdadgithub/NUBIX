@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Base configuration -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Domain-specific configurations -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- NUBIX API -->
+        <domain includeSubdomains="true">api.nubix.app</domain>
+        <domain includeSubdomains="true">dev-api.nubix.app</domain>
+        <domain includeSubdomains="true">staging-api.nubix.app</domain>
+        
+        <!-- Certificate pinning for NUBIX API -->
+        <pin-set expiration="2025-12-31">
+            <!-- Add your actual certificate pins here -->
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+        
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+    
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Binance API -->
+        <domain includeSubdomains="true">api.binance.com</domain>
+        <domain includeSubdomains="true">testnet.binance.vision</domain>
+        
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+    
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Bankak API -->
+        <domain includeSubdomains="true">api.bankak.com</domain>
+        <domain includeSubdomains="true">dev-api.bankak.com</domain>
+        
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+    
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Firebase services -->
+        <domain includeSubdomains="true">firebase.google.com</domain>
+        <domain includeSubdomains="true">firebaseapp.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+    
+    <!-- Development configuration (only for debug builds) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
