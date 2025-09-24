@@ -52,13 +52,6 @@ const HomeScreen = () => {
     setActiveTab('buy');
   };
 
-  const handleDepositClick = () => {
-    alert(t(
-      'Deposit feature coming soon! You will be able to deposit funds from your Bank of Khartoum account.',
-      'ميزة الإيداع قريباً! ستتمكن من إيداع الأموال من حسابك في بنك الخرطوم.'
-    ));
-  };
-
   const handleLogout = () => {
     if (window.confirm(t('Are you sure you want to sign out?', 'هل أنت متأكد من أنك تريد تسجيل الخروج؟'))) {
       logout();
