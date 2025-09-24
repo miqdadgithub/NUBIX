@@ -82,7 +82,7 @@ const HomeScreen = () => {
                 className="p-2 text-gray-600 hover:text-primary-600 nubix-transition"
                 disabled={refreshing}
               >
-                <Refresh className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                <RotateCcw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
               </button>
               <button className="p-2 text-gray-600 hover:text-primary-600 nubix-transition">
                 <Bell className="w-5 h-5" />
