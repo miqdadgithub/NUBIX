@@ -57,14 +57,14 @@ class CryptoPrice(BaseModel):
 # Mock data for development
 MOCK_USERS = {
     "test@nubix.com": {
-        "password": "$2b$12$LQv3c1yqBwlneoqZlBqoEe4kI6t8sYhHp5S9kJo3J1J5tQh8pZ9Ly",  # 123456
+        "password": "123456",  # Plain text for development
         "fullName": "Test User",
         "phoneNumber": "+249123456789",
         "kycStatus": "pending",
         "balance": 0.0
     },
     "admin@nubix.com": {
-        "password": "$2b$12$8Z5o2HKm9p1UqQp7k3L6BuYvK8TfGqF9wR2eC4xY7nP5mT8vJ3qL2",  # admin123
+        "password": "admin123",  # Plain text for development
         "fullName": "Admin User",
         "phoneNumber": "+249987654321",
         "kycStatus": "approved",
