@@ -19,7 +19,6 @@ import NubixLogo from '../NubixLogo';
 import cryptoService from '../../services/cryptoService';
 
 const HomeScreen = () => {
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { t, toggleLanguage, isArabic } = useLanguage();
   
