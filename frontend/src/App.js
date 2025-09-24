@@ -2,14 +2,6 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
-// Context
-const AuthContext = createContext();
-const LanguageContext = createContext();
-
-// API Configuration
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-axios.defaults.baseURL = API_BASE_URL;
-
 // Components
 import LoginScreen from './components/auth/LoginScreen';
 import RegisterScreen from './components/auth/RegisterScreen';
@@ -18,6 +10,14 @@ import OtpVerificationScreen from './components/auth/OtpVerificationScreen';
 import HomeScreen from './components/home/HomeScreen';
 import SplashScreen from './components/SplashScreen';
 import OnboardingScreen from './components/OnboardingScreen';
+
+// Context
+const AuthContext = createContext();
+const LanguageContext = createContext();
+
+// API Configuration
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+axios.defaults.baseURL = API_BASE_URL;
 
 // Custom Hooks
 export const useAuth = () => {
