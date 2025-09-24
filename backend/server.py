@@ -61,14 +61,16 @@ MOCK_USERS = {
         "fullName": "Test User",
         "phoneNumber": "+249123456789",
         "kycStatus": "pending",
-        "balance": 0.0
+        "balance": 0.0,
+        "createdAt": "2024-01-01T00:00:00Z"
     },
     "admin@nubix.com": {
         "password": "admin123",  # Plain text for development
         "fullName": "Admin User",
         "phoneNumber": "+249987654321",
         "kycStatus": "approved",
-        "balance": 50000.0
+        "balance": 50000.0,
+        "createdAt": "2024-01-01T00:00:00Z"
     }
 }
 
