@@ -252,9 +252,23 @@ async def verify_phone_otp(otp_data: OTPVerification):
 
 @app.get("/api/crypto/prices")
 async def get_crypto_prices():
+    # Updated crypto prices with SDG conversion (1 USD = 4000 SDG)
+    USD_TO_SDG = 4000
+    
+    updated_prices = []
+    for crypto in MOCK_CRYPTO_PRICES:
+        crypto_with_sdg = crypto.copy()
+        crypto_with_sdg["priceSDG"] = crypto["price"] * USD_TO_SDG
+        crypto_with_sdg["priceUSD"] = crypto["price"]
+        updated_prices.append(crypto_with_sdg)
+    
     return {
-        "prices": MOCK_CRYPTO_PRICES,
-        "lastUpdated": datetime.utcnow().isoformat()
+        "prices": updated_prices,
+        "lastUpdated": datetime.utcnow().isoformat(),
+        "exchangeRate": {
+            "USD_TO_SDG": USD_TO_SDG,
+            "description": "1 USD = 4,000 SDG (Sudanese Pounds)"
+        }
     }
 
 @app.get("/api/user/profile")
