@@ -54,9 +54,14 @@ const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get('/api/user/profile');
+      const response = await axios.get('/api/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setUser(response.data.user);
     } catch (error) {
+      console.error('Failed to fetch user profile:', error);
       // Token is invalid, remove it
       logout();
     } finally {
