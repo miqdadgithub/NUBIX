@@ -177,42 +177,19 @@ const AuthProvider = ({ children }) => {
 
 // Language Provider
 const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('nubix_language') || 'en';
-  });
-
-  const [isFirstTime, setIsFirstTime] = useState(() => {
-    return !localStorage.getItem('nubix_onboarded');
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute('dir', language === 'ar' ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', language);
-    localStorage.setItem('nubix_language', language);
-  }, [language]);
-
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
-  };
-
-  const setEnglish = () => setLanguage('en');
-  const setArabic = () => setLanguage('ar');
-
-  const completeOnboarding = () => {
-    setIsFirstTime(false);
-    localStorage.setItem('nubix_onboarded', 'true');
-  };
-
+  // English-only implementation
   const value = {
-    language,
-    isArabic: language === 'ar',
-    isEnglish: language === 'en',
-    toggleLanguage,
-    setEnglish,
-    setArabic,
-    isFirstTime,
-    completeOnboarding,
-    t: (enText, arText) => language === 'ar' ? arText : enText
+    language: 'en',
+    isArabic: false,
+    isEnglish: true,
+    toggleLanguage: () => {}, // No-op since English only
+    setEnglish: () => {},
+    setArabic: () => {},
+    isFirstTime: !localStorage.getItem('nubix_onboarded'),
+    completeOnboarding: () => {
+      localStorage.setItem('nubix_onboarded', 'true');
+    },
+    t: (enText) => enText // Always return English text
   };
 
   return (
