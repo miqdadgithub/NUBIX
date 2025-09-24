@@ -106,6 +106,14 @@ MOCK_CRYPTO_PRICES = [
         "change24h": 3.12,
         "volume24h": 850000000,
         "icon": "₳"
+    },
+    {
+        "symbol": "XRP",
+        "name": "XRP",
+        "price": 0.6234,
+        "change24h": 1.76,
+        "volume24h": 1200000000,
+        "icon": "X"
     }
 ]
 
