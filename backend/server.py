@@ -282,7 +282,9 @@ async def get_crypto_prices():
     }
 
 @app.get("/api/user/profile")
-async def get_user_profile(authorization: str = None):
+async def get_user_profile(request: Request):
+    authorization = request.headers.get("authorization") or request.headers.get("Authorization")
+    
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Authentication required")
     
