@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const CRYPTO_API_KEY = 'e50b0216-3b44-41fa-bf7c-536d34eee2e0';
-const COINMARKET_API_BASE = 'https://pro-api.coinmarketcap.com/v1';
 
 // Exchange rates - $1 USD = 4,000 SDG (Sudanese Pounds)
 const USD_TO_SDG_RATE = 4000;
@@ -11,45 +10,12 @@ class CryptoService {
     this.apiKey = CRYPTO_API_KEY;
   }
 
-  // Get latest cryptocurrency prices
+  // Get latest cryptocurrency prices - Using backend API to avoid CORS
   async getLatestPrices(symbols = ['BTC', 'ETH', 'BNB', 'ADA', 'XRP']) {
     try {
-      const response = await axios.get(`${COINMARKET_API_BASE}/cryptocurrency/quotes/latest`, {
-        headers: {
-          'X-CMC_PRO_API_KEY': this.apiKey,
-          'Accept': 'application/json',
-          'Accept-Encoding': 'deflate, gzip'
-        },
-        params: {
-          symbol: symbols.join(','),
-          convert: 'USD'
-        }
-      });
-
-      const data = response.data.data;
-      
-      return symbols.map(symbol => {
-        const coinData = data[symbol];
-        if (coinData) {
-          const usdPrice = coinData.quote.USD.price;
-          const sdgPrice = usdPrice * USD_TO_SDG_RATE;
-          
-          return {
-            id: coinData.id,
-            symbol: coinData.symbol,
-            name: coinData.name,
-            priceUSD: usdPrice,
-            priceSDG: sdgPrice,
-            change24h: coinData.quote.USD.percent_change_24h,
-            change7d: coinData.quote.USD.percent_change_7d,
-            marketCap: coinData.quote.USD.market_cap,
-            volume24h: coinData.quote.USD.volume_24h,
-            lastUpdated: coinData.last_updated,
-            icon: this.getCryptoIcon(symbol)
-          };
-        }
-        return null;
-      }).filter(Boolean);
+      // Call our backend API instead of external API to avoid CORS
+      const response = await axios.get('/api/crypto/prices');
+      return response.data.prices;
     } catch (error) {
       console.error('Error fetching crypto prices:', error);
       
@@ -61,22 +27,9 @@ class CryptoService {
   // Get trending cryptocurrencies
   async getTrendingCoins() {
     try {
-      const response = await axios.get(`${COINMARKET_API_BASE}/cryptocurrency/trending/latest`, {
-        headers: {
-          'X-CMC_PRO_API_KEY': this.apiKey,
-          'Accept': 'application/json'
-        }
-      });
-
-      return response.data.data.map(coin => ({
-        id: coin.id,
-        symbol: coin.symbol,
-        name: coin.name,
-        priceUSD: coin.quote.USD.price,
-        priceSDG: coin.quote.USD.price * USD_TO_SDG_RATE,
-        change24h: coin.quote.USD.percent_change_24h,
-        icon: this.getCryptoIcon(coin.symbol)
-      }));
+      // Use backend endpoint for trending coins
+      const response = await axios.get('/api/crypto/trending');
+      return response.data.trending || [];
     } catch (error) {
       console.error('Error fetching trending coins:', error);
       return [];
@@ -99,8 +52,8 @@ class CryptoService {
       style: 'currency',
       currency: 'SDG',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    }).format(amount);
+      maximumFractionDigits: 0
+    }).format(amount).replace('SDG', 'ج.س.');
   }
 
   formatUSD(amount) {
@@ -179,6 +132,18 @@ class CryptoService {
         marketCap: 15800000000,
         volume24h: 850000000,
         icon: '₳'
+      },
+      {
+        id: 52,
+        symbol: 'XRP',
+        name: 'XRP',
+        priceUSD: 0.6234,
+        priceSDG: 0.6234 * USD_TO_SDG_RATE,
+        change24h: 1.76,
+        change7d: -0.43,
+        marketCap: 35200000000,
+        volume24h: 1200000000,
+        icon: 'X'
       }
     ].map(coin => ({
       ...coin,
@@ -207,4 +172,5 @@ class CryptoService {
   }
 }
 
-export default new CryptoService();
+const cryptoService = new CryptoService();
+export default cryptoService;
