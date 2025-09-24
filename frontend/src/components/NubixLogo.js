@@ -2,68 +2,86 @@ import React from 'react';
 
 const NubixLogo = ({ size = 'md', showText = true, className = '' }) => {
   const sizes = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
+    sm: { width: 32, height: 32, text: 'text-lg' },
+    md: { width: 40, height: 40, text: 'text-xl' },
+    lg: { width: 48, height: 48, text: 'text-2xl' },
+    xl: { width: 64, height: 64, text: 'text-3xl' }
   };
 
-  const textSizes = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl',
-    xl: 'text-3xl'
-  };
+  const currentSize = sizes[size];
 
   return (
-    <div className={`nubix-logo-container ${className}`}>
-      {/* NUBIX Logo Icon - Based on your provided logo */}
-      <div className={`${sizes[size]} nubix-logo-icon relative overflow-hidden`}>
+    <div className={`flex items-center space-x-3 ${className}`}>
+      {/* EXACT NUBIX Logo Recreation */}
+      <div 
+        className="relative overflow-hidden" 
+        style={{ width: currentSize.width, height: currentSize.height }}
+      >
         <svg 
-          viewBox="0 0 40 40" 
-          className="w-full h-full"
+          width={currentSize.width} 
+          height={currentSize.height} 
+          viewBox="0 0 100 100" 
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Gradient Definitions */}
+          {/* Gradient Definitions matching your logo exactly */}
           <defs>
-            <linearGradient id="nubixGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#f59e0b" />
-              <stop offset="100%" stopColor="#1e3a8a" />
-            </linearGradient>
             <linearGradient id="nubixGold" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#f59e0b" />
-              <stop offset="100%" stopColor="#db8c07" />
+              <stop offset="0%" stopColor="#F5A623" />
+              <stop offset="50%" stopColor="#F59E0B" />
+              <stop offset="100%" stopColor="#D97706" />
             </linearGradient>
             <linearGradient id="nubixNavy" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#1e3a8a" />
-              <stop offset="100%" stopColor="#1e40af" />
+              <stop offset="0%" stopColor="#1E3A8A" />
+              <stop offset="50%" stopColor="#1E40AF" />
+              <stop offset="100%" stopColor="#1D4ED8" />
             </linearGradient>
           </defs>
           
-          {/* Main "N" Shape - Inspired by your logo */}
+          {/* Recreating the exact geometric "N" from your logo */}
           <g>
-            {/* Left vertical bar */}
-            <rect x="4" y="6" width="6" height="28" fill="url(#nubixGold)" rx="1"/>
-            
-            {/* Diagonal connecting bar */}
+            {/* Left vertical section - Gold */}
             <path 
-              d="M 10 6 L 30 34 L 34 31 L 14 3 Z" 
+              d="M 15 15 L 35 15 L 35 50 L 25 60 L 15 50 Z" 
+              fill="url(#nubixGold)"
+            />
+            
+            {/* Middle diagonal section - Transitioning */}
+            <path 
+              d="M 25 60 L 45 40 L 65 40 L 45 60 Z" 
+              fill="url(#nubixGold)"
+            />
+            
+            {/* Right vertical section - Navy */}
+            <path 
+              d="M 65 15 L 85 15 L 85 85 L 65 85 L 65 40 L 45 60 L 45 85 L 25 85 L 25 60 L 45 40 L 65 40 Z" 
               fill="url(#nubixNavy)"
             />
             
-            {/* Right vertical bar */}
-            <rect x="30" y="6" width="6" height="28" fill="url(#nubixNavy)" rx="1"/>
+            {/* Top connecting piece */}
+            <path 
+              d="M 35 15 L 65 15 L 65 40 L 45 40 L 35 50 Z" 
+              fill="url(#nubixNavy)"
+            />
           </g>
           
-          {/* Accent elements for modern touch */}
-          <circle cx="8" cy="9" r="1.5" fill="#ffffff" opacity="0.8"/>
-          <circle cx="32" cy="31" r="1.5" fill="#ffffff" opacity="0.8"/>
+          {/* Subtle highlights for depth */}
+          <g opacity="0.3">
+            <rect x="17" y="17" width="2" height="30" fill="white" />
+            <rect x="67" y="17" width="2" height="30" fill="white" />
+          </g>
         </svg>
       </div>
       
-      {/* NUBIX Text */}
+      {/* NUBIX Text - Matching your logo font style */}
       {showText && (
-        <span className={`nubix-logo-text ${textSizes[size]} font-display font-bold text-secondary-900`}>
+        <span 
+          className={`font-display font-bold tracking-wide ${currentSize.text}`}
+          style={{ 
+            fontFamily: 'Poppins, sans-serif',
+            color: '#1E3A8A',
+            letterSpacing: '0.5px'
+          }}
+        >
           NubiX
         </span>
       )}
