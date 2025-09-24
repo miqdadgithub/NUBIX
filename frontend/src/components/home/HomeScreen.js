@@ -13,7 +13,7 @@ import {
   X,
   ArrowUpRight,
   ArrowDownRight,
-  Refresh
+  RotateCcw
 } from 'lucide-react';
 import NubixLogo from '../NubixLogo';
 import cryptoService from '../../services/cryptoService';
