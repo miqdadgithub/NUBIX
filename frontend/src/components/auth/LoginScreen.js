@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useLanguage } from '../../App';
 import { Eye, EyeOff, Mail, Lock, Phone, AlertCircle } from 'lucide-react';
+import NubixLogo from '../NubixLogo';
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -40,19 +41,14 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center">
-            <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center mr-3">
-              <span className="text-white font-bold text-xl">N</span>
-            </div>
-            <span className="font-bold text-2xl text-gray-900">NUBIX</span>
-          </div>
+          <NubixLogo size="lg" showText={true} />
           <button
             onClick={toggleLanguage}
-            className="text-primary-600 hover:text-primary-700 font-medium"
+            className="text-primary-600 hover:text-primary-700 font-medium nubix-transition bg-white px-4 py-2 rounded-lg shadow-nubix"
           >
             {isArabic ? 'English' : 'العربية'}
           </button>
@@ -60,7 +56,7 @@ const LoginScreen = () => {
 
         {/* Welcome Text */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-display font-bold text-gray-900">
             {t('Welcome Back!', 'مرحباً بعودتك!')}
           </h2>
           <p className="mt-2 text-gray-600">
@@ -69,24 +65,24 @@ const LoginScreen = () => {
         </div>
 
         {/* Development Mode Notice */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-6 nubix-card bg-blue-50 border border-blue-200">
           <div className="flex items-center">
             <AlertCircle className="w-5 h-5 text-blue-600 mr-2" />
-            <span className="text-blue-800 font-medium">Development Mode</span>
+            <span className="text-blue-800 font-semibold">Development Mode</span>
           </div>
-          <div className="mt-2 text-sm text-blue-700">
-            <p>Use: test@nubix.com / 123456</p>
-            <p>Or: admin@nubix.com / admin123</p>
+          <div className="mt-2 text-sm text-blue-700 space-y-1">
+            <p className="font-medium">Use: test@nubix.com / 123456</p>
+            <p className="font-medium">Or: admin@nubix.com / admin123</p>
           </div>
         </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+        <div className="nubix-card">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                 <div className="flex">
                   <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
                   <span className="text-red-800">{error}</span>
@@ -96,7 +92,7 @@ const LoginScreen = () => {
 
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {t('Email', 'البريد الإلكتروني')}
               </label>
               <div className="relative">
@@ -106,7 +102,7 @@ const LoginScreen = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="input-field pl-10"
+                  className="nubix-input pl-10"
                   placeholder={t('Enter your email', 'أدخل بريدك الإلكتروني')}
                   required
                 />
@@ -115,7 +111,7 @@ const LoginScreen = () => {
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {t('Password', 'كلمة المرور')}
               </label>
               <div className="relative">
@@ -125,14 +121,14 @@ const LoginScreen = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="input-field pl-10 pr-10"
+                  className="nubix-input pl-10 pr-10"
                   placeholder={t('Enter your password', 'أدخل كلمة المرور')}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 nubix-transition"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -143,7 +139,7 @@ const LoginScreen = () => {
             <div className="flex items-center justify-end">
               <button
                 type="button"
-                className="text-primary-600 hover:text-primary-500 text-sm font-medium"
+                className="text-primary-600 hover:text-primary-500 text-sm font-medium nubix-transition"
               >
                 {t('Forgot Password?', 'نسيت كلمة المرور؟')}
               </button>
@@ -153,10 +149,10 @@ const LoginScreen = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary"
+              className="w-full nubix-btn-primary text-lg"
             >
               {loading ? (
-                <div className="loading-spinner"></div>
+                <div className="nubix-spinner"></div>
               ) : (
                 t('Sign In', 'تسجيل الدخول')
               )}
@@ -165,7 +161,7 @@ const LoginScreen = () => {
             {/* Phone Auth Button */}
             <Link
               to="/phone-auth"
-              className="w-full btn-secondary"
+              className="w-full nubix-btn-secondary text-lg"
             >
               <Phone className="w-5 h-5 mr-2" />
               {t('Sign in with Phone', 'الدخول برقم الهاتف')}
@@ -176,7 +172,7 @@ const LoginScreen = () => {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               {t("Don't have an account?", 'لا تملك حساباً؟')}{' '}
-              <Link to="/register" className="text-primary-600 hover:text-primary-500 font-medium">
+              <Link to="/register" className="text-primary-600 hover:text-primary-500 font-semibold nubix-transition">
                 {t('Sign Up', 'إنشاء حساب')}
               </Link>
             </p>
