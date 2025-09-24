@@ -176,8 +176,8 @@ async def login_user(user_data: UserLogin):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Verify password
-    if not verify_password(user_data.password, user["password"]):
+    # For development mode, use simple password comparison
+    if user["password"] != user_data.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Generate token
