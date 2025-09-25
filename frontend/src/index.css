@@ -48,7 +48,7 @@ body {
   @apply bg-white border-2 border-secondary-500 text-secondary-600 hover:bg-gray-100 font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center shadow-nubix;
 }
 
-/* Aliases for legacy class names used in components */
+/* Aliases */
 .btn-primary { @apply nubix-btn-primary; }
 .input-field { @apply nubix-input; }
 .loading-spinner { @apply nubix-spinner; }
@@ -60,9 +60,7 @@ body {
 }
 
 /* Transitions */
-.nubix-transition {
-  @apply transition-all duration-300 ease-in-out;
-}
+.nubix-transition { @apply transition-all duration-300 ease-in-out; }
 
 /* Spinner */
 .nubix-spinner {
@@ -74,17 +72,26 @@ body {
   animation: nubix-spin 1s linear infinite;
 }
 
-@keyframes nubix-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@keyframes nubix-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Price indicators (no green/blue) */
+/* Price indicators */
 .price-up { color: #CD9613; }
 .price-down { color: #DC2626; }
 
 /* Focus ring */
-.nubix-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(205, 150, 19, 0.15);
+.nubix-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(205, 150, 19, 0.15); }
+
+/* Subtle entrance + float animations for modern feel */
+.fade-in-up { animation: fadeInUp 0.45s ease-out both; }
+.animate-float-slow { animation: floatSlow 6s ease-in-out infinite; }
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatSlow {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
 }
