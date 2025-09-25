@@ -7,7 +7,7 @@ import LoginScreen from './components/auth/LoginScreen';
 import RegisterScreen from './components/auth/RegisterScreen';
 import PhoneAuthScreen from './components/auth/PhoneAuthScreen';
 import OtpVerificationScreen from './components/auth/OtpVerificationScreen';
-import HomeScreen from './components/home/HomeScreen';
+import HomeScreen from './components/home/Dashboard';
 import SplashScreen from './components/SplashScreen';
 import OnboardingScreen from './components/OnboardingScreen';
 
