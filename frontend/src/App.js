@@ -271,6 +271,30 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
+      <Route path="/markets" element={
+        <ProtectedRoute>
+          <MarketsScreen />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/buy" element={
+        <ProtectedRoute>
+          <BuyScreen />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/inbox" element={
+        <ProtectedRoute>
+          <InboxScreen />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <ProfileScreen />
+        </ProtectedRoute>
+      } />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
