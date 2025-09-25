@@ -7,18 +7,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // NUBIX Brand Colors - extracted from logo
+        // NUBIX Brand Colors ONLY - from your logo
         primary: {
-          50: '#fef7ec',
-          100: '#feefd2',
-          200: '#fddba4',
-          300: '#fbc16c',
-          400: '#f8a332',
-          500: '#f59e0b', // Main gold color from logo
-          600: '#db8c07',
-          700: '#b67509',
-          800: '#945d0e',
-          900: '#794c0f',
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b', // Main gold from logo
+          600: '#d97706', // Darker gold from logo
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
         },
         secondary: {
           50: '#eff6ff',
@@ -29,14 +29,13 @@ module.exports = {
           500: '#3b82f6',
           600: '#2563eb',
           700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a', // Main navy color from logo
+          800: '#1e40af', // Main navy from logo
+          900: '#1e3a8a', // Darker navy from logo
         },
-        // Functional colors
-        success: '#10b981',
-        error: '#ef4444',
-        warning: '#f59e0b',
-        info: '#3b82f6',
+        // Functional colors using logo palette
+        success: '#f59e0b', // Use gold for success
+        error: '#dc2626', // Keep red for errors
+        warning: '#f59e0b', // Use gold
         // Neutral colors
         gray: {
           50: '#f9fafb',
@@ -54,11 +53,10 @@ module.exports = {
       fontFamily: {
         'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
         'display': ['Poppins', 'ui-sans-serif', 'system-ui'],
-        'arabic': ['Noto Sans Arabic', 'Arial', 'sans-serif'],
       },
       backgroundImage: {
         'nubix-gradient': 'linear-gradient(135deg, #f59e0b 0%, #1e3a8a 100%)',
-        'nubix-gold': 'linear-gradient(135deg, #f59e0b 0%, #db8c07 100%)',
+        'nubix-gold': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
         'nubix-navy': 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
       },
       boxShadow: {
