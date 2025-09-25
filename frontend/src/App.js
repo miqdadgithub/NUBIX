@@ -60,8 +60,8 @@ const AuthProvider = ({ children }) => {
       });
       setUser(response.data.user);
     } catch (error) {
-      // Token invalid/expired - ensure logout
-      logout(false);
+      // Token invalid/expired - ensure logout and clear storage
+      logout();
     } finally {
       setLoading(false);
     }
