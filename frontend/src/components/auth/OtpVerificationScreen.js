@@ -74,10 +74,14 @@ const OtpVerificationScreen = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8" style={{ backgroundColor: '#FAF2E6' }}>
+    <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden" style={{ backgroundColor: '#FAF2E6' }}>
+      {/* Decorative gradients */}
+      <div className="pointer-events-none absolute -top-10 -right-10 w-72 h-72 bg-gradient-to-tr from-primary-500 to-secondary-500 rounded-full blur-3xl opacity-20"></div>
+      <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 bg-gradient-to-tr from-secondary-900 to-secondary-500 rounded-full blur-3xl opacity-10"></div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Header */}
-        <div className="flex items-center mb-8">
+        <div className="flex items-center mb-8 fade-in-up">
           <button onClick={() => navigate(-1)} className="mr-3 p-2 text-secondary-600 hover:text-secondary-800" data-testid="otp-back">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -88,7 +92,7 @@ const OtpVerificationScreen = () => {
         </div>
 
         {/* SMS Icon */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 fade-in-up" style={{ animationDelay: '60ms' }}>
           <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <MessageSquare className="w-10 h-10 text-primary-600" />
           </div>
@@ -97,9 +101,9 @@ const OtpVerificationScreen = () => {
           <p className="font-semibold text-secondary-700" data-testid="otp-phone">{phoneNumber}</p>
         </div>
 
-        {/* Development Mode Notice */}
+        {/* Dev Mode Notice */}
         {devOtp && (
-          <div className="mb-6 p-4 bg-gray-50 border border-gray-300 rounded-lg">
+          <div className="mb-6 p-4 bg-white/70 border border-gray-200 rounded-lg backdrop-blur-md fade-in-up" style={{ animationDelay: '100ms' }}>
             <div className="flex items-center">
               <AlertCircle className="w-5 h-5 text-secondary-600 mr-2" />
               <span className="text-secondary-800 font-medium">Development Mode</span>
@@ -111,8 +115,8 @@ const OtpVerificationScreen = () => {
         )}
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+      <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white/80 py-8 px-4 shadow-nubix sm:rounded-2xl sm:px-10 border border-gray-200 backdrop-blur-md fade-in-up" style={{ animationDelay: '140ms' }}>
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4" data-testid="otp-error">
               <div className="flex">
@@ -123,7 +127,7 @@ const OtpVerificationScreen = () => {
           )}
 
           <div className="mb-6">
-            <div className="flex justify-center space-x-2">
+            <div className="flex justify-center gap-2">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -132,7 +136,7 @@ const OtpVerificationScreen = () => {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12 h-12 text-center text-xl font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-12 h-12 text-center text-xl font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-transform duration-150 hover:scale-[1.02]"
                   maxLength={1}
                   data-testid={`otp-input-${index}`}
                 />
@@ -140,8 +144,8 @@ const OtpVerificationScreen = () => {
             </div>
           </div>
 
-          <button onClick={() => handleSubmit()} disabled={loading || otp.some(digit => !digit)} className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed" data-testid="otp-verify-button">
-            {loading ? <div className="loading-spinner"></div> : t('Verify')}
+          <button onClick={() => handleSubmit()} disabled={loading || otp.some(digit => !digit)} className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed group" data-testid="otp-verify-button">
+            {loading ? <div className="loading-spinner"></div> : <span className="inline-flex items-center gap-2">Verify <span className="transition-transform group-hover:translate-x-0.5">→</span></span>}
           </button>
 
           <div className="mt-6 text-center">
