@@ -8,6 +8,10 @@ import RegisterScreen from './components/auth/RegisterScreen';
 import PhoneAuthScreen from './components/auth/PhoneAuthScreen';
 import OtpVerificationScreen from './components/auth/OtpVerificationScreen';
 import HomeScreen from './components/home/Dashboard';
+import MarketsScreen from './components/markets/MarketsScreen';
+import BuyScreen from './components/buy/BuyScreen';
+import InboxScreen from './components/inbox/InboxScreen';
+import ProfileScreen from './components/profile/ProfileScreen';
 import SplashScreen from './components/SplashScreen';
 import OnboardingScreen from './components/OnboardingScreen';
 
