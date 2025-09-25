@@ -15,8 +15,8 @@ import OnboardingScreen from './components/OnboardingScreen';
 const AuthContext = createContext();
 const LanguageContext = createContext();
 
-// API Configuration
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+// API Configuration - MUST use env var only
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.baseURL = API_BASE_URL;
 
 // Custom Hooks
@@ -44,7 +44,6 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      // Verify token and get user info
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUserProfile();
     } else {
@@ -61,9 +60,8 @@ const AuthProvider = ({ children }) => {
       });
       setUser(response.data.user);
     } catch (error) {
-      console.error('Failed to fetch user profile:', error);
-      // Token is invalid, remove it
-      logout();
+      // Token invalid/expired - ensure logout
+      logout(false);
     } finally {
       setLoading(false);
     }
@@ -73,12 +71,10 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       const { token: newToken, user: userData } = response.data;
-      
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('nubix_token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
       return { success: true };
     } catch (error) {
       return { 
@@ -97,12 +93,10 @@ const AuthProvider = ({ children }) => {
         phoneNumber
       });
       const { token: newToken, user: userData } = response.data;
-      
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('nubix_token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
       return { success: true };
     } catch (error) {
       return { 
@@ -135,12 +129,10 @@ const AuthProvider = ({ children }) => {
         otp
       });
       const { token: newToken, user: userData } = response.data;
-      
       setToken(newToken);
       setUser(userData);
       localStorage.setItem('nubix_token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
       return { success: true };
     } catch (error) {
       return { 
@@ -150,10 +142,10 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = (removeStorage = true) => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('nubix_token');
+    if (removeStorage) localStorage.removeItem('nubix_token');
     delete axios.defaults.headers.common['Authorization'];
   };
 
@@ -175,21 +167,20 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-// Language Provider
+// Language Provider (English-only)
 const LanguageProvider = ({ children }) => {
-  // English-only implementation
   const value = {
     language: 'en',
     isArabic: false,
     isEnglish: true,
-    toggleLanguage: () => {}, // No-op since English only
+    toggleLanguage: () => {},
     setEnglish: () => {},
     setArabic: () => {},
     isFirstTime: !localStorage.getItem('nubix_onboarded'),
     completeOnboarding: () => {
       localStorage.setItem('nubix_onboarded', 'true');
     },
-    t: (enText) => enText // Always return English text
+    t: (enText) => enText
   };
 
   return (
@@ -202,32 +193,23 @@ const LanguageProvider = ({ children }) => {
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
-  if (loading) {
-    return <SplashScreen />;
-  }
-  
+  if (loading) return <SplashScreen />;
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
-// Public Route Component (redirect if authenticated)
+// Public Route Component
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
-  if (loading) {
-    return <SplashScreen />;
-  }
-  
+  if (loading) return <SplashScreen />;
   return isAuthenticated ? <Navigate to="/home" replace /> : children;
 };
 
-// Main App Component
 function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
         <Router>
-          <div className="App min-h-screen bg-gray-50">
+          <div className="App min-h-screen" style={{ backgroundColor: '#FAF2E6' }}>
             <AppRoutes />
           </div>
         </Router>
@@ -236,60 +218,55 @@ function App() {
   );
 }
 
-// App Routes
 const AppRoutes = () => {
   const { isAuthenticated, loading } = useAuth();
   const { isFirstTime } = useLanguage();
 
-  if (loading) {
-    return <SplashScreen />;
-  }
+  if (loading) return <SplashScreen />;
 
   return (
     <Routes>
       <Route path="/" element={
         isAuthenticated ? <Navigate to="/home" replace /> :
-        isFirstTime ? <Navigate to="/onboarding" replace /> :
-        <Navigate to="/login" replace />
+        (isFirstTime ? <Navigate to="/onboarding" replace /> : <Navigate to="/login" replace />)
       } />
-      
+
       <Route path="/onboarding" element={
         <PublicRoute>
           <OnboardingScreen />
         </PublicRoute>
       } />
-      
+
       <Route path="/login" element={
         <PublicRoute>
           <LoginScreen />
         </PublicRoute>
       } />
-      
+
       <Route path="/register" element={
         <PublicRoute>
           <RegisterScreen />
         </PublicRoute>
       } />
-      
+
       <Route path="/phone-auth" element={
         <PublicRoute>
           <PhoneAuthScreen />
         </PublicRoute>
       } />
-      
+
       <Route path="/otp-verification" element={
         <PublicRoute>
           <OtpVerificationScreen />
         </PublicRoute>
       } />
-      
+
       <Route path="/home" element={
         <ProtectedRoute>
           <HomeScreen />
         </ProtectedRoute>
       } />
-      
-      {/* Catch all route */}
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -7,61 +7,68 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // NUBIX Brand Colors ONLY - from your logo
+        // Brand palette from provided logo/colors
         primary: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b', // Main gold from logo
-          600: '#d97706', // Darker gold from logo
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+          50: '#FFF6E6',
+          100: '#FCEAC7',
+          200: '#F6D999',
+          300: '#F0C66A',
+          400: '#E7B646',
+          500: '#CD9613', // Warm Gold (CTA)
+          600: '#B88211',
+          700: '#9C6E0E',
+          800: '#7C570B',
+          900: '#5D4108',
         },
         secondary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af', // Main navy from logo
-          900: '#1e3a8a', // Darker navy from logo
+          50: '#E6EBF2',
+          100: '#CCD6E5',
+          200: '#99AECB',
+          300: '#6686B0',
+          400: '#335E96',
+          500: '#0A2644', // Accent Navy
+          600: '#091F39',
+          700: '#07192E',
+          800: '#061324',
+          900: '#011C3C', // Brand Navy (Deep)
         },
-        // Functional colors using logo palette
-        success: '#f59e0b', // Use gold for success
-        error: '#dc2626', // Keep red for errors
-        warning: '#f59e0b', // Use gold
-        // Neutral colors
+        brand: {
+          navy: '#011C3C',
+          navyAccent: '#0A2644',
+          gold: '#CD9613',
+          goldMuted: '#DAB157',
+          grayMuted: '#A0A3A7',
+          offWhite: '#FAF2E6',
+        },
+        // Map functional colors to brand (no green/blue)
+        success: '#CD9613',
+        warning: '#DAB157',
+        error: '#DC2626',
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
-        }
+          50: '#FAF2E6', // background
+          100: '#F5EEE2',
+          200: '#ECE6DB',
+          300: '#D9D6D1',
+          400: '#A0A3A7',
+          500: '#7B7F84',
+          600: '#5B6066',
+          700: '#3E434A',
+          800: '#232A33',
+          900: '#0F1720',
+        },
       },
       fontFamily: {
         'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
         'display': ['Poppins', 'ui-sans-serif', 'system-ui'],
       },
       backgroundImage: {
-        'nubix-gradient': 'linear-gradient(135deg, #f59e0b 0%, #1e3a8a 100%)',
-        'nubix-gold': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-        'nubix-navy': 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
+        'nubix-gradient': 'linear-gradient(135deg, #CD9613 0%, #0A2644 100%)',
+        'nubix-gold': 'linear-gradient(135deg, #CD9613 0%, #DAB157 100%)',
+        'nubix-navy': 'linear-gradient(135deg, #011C3C 0%, #0A2644 100%)',
       },
       boxShadow: {
-        'nubix': '0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)',
-        'nubix-lg': '0 10px 15px -3px rgba(245, 158, 11, 0.1), 0 4px 6px -2px rgba(245, 158, 11, 0.05)',
+        'nubix': '0 4px 6px -1px rgba(1, 28, 60, 0.08), 0 2px 4px -1px rgba(205, 150, 19, 0.06)',
+        'nubix-lg': '0 10px 15px -3px rgba(1, 28, 60, 0.1), 0 4px 6px -2px rgba(205, 150, 19, 0.08)',
       }
     },
   },

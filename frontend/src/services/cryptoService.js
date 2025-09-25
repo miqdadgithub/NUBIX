@@ -1,33 +1,22 @@
 import axios from 'axios';
 
-const CRYPTO_API_KEY = 'e50b0216-3b44-41fa-bf7c-536d34eee2e0';
-
 // Exchange rates - $1 USD = 4,000 SDG (Sudanese Pounds)
 const USD_TO_SDG_RATE = 4000;
 
 class CryptoService {
-  constructor() {
-    this.apiKey = CRYPTO_API_KEY;
-  }
-
   // Get latest cryptocurrency prices - Using backend API to avoid CORS
   async getLatestPrices(symbols = ['BTC', 'ETH', 'BNB', 'ADA', 'XRP']) {
     try {
-      // Call our backend API instead of external API to avoid CORS
       const response = await axios.get('/api/crypto/prices');
       return response.data.prices;
     } catch (error) {
       console.error('Error fetching crypto prices:', error);
-      
-      // Fallback to mock data if API fails
       return this.getMockPrices();
     }
   }
 
-  // Get trending cryptocurrencies
   async getTrendingCoins() {
     try {
-      // Use backend endpoint for trending coins
       const response = await axios.get('/api/crypto/trending');
       return response.data.trending || [];
     } catch (error) {
@@ -46,14 +35,14 @@ class CryptoService {
     return sdgAmount / USD_TO_SDG_RATE;
   }
 
-  // Format currency for display
+  // Format currency for display (English numerals, SDG code)
   formatSDG(amount) {
-    return new Intl.NumberFormat('ar-SD', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'SDG',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(amount).replace('SDG', 'ج.س.');
+    }).format(amount);
   }
 
   formatUSD(amount) {
@@ -159,7 +148,6 @@ class CryptoService {
     const totalSDG = totalUSD * USD_TO_SDG_RATE;
     const fee = totalSDG * 0.0075; // 0.75% fee
     const processingFee = 50; // SDG 50 processing fee
-    
     return {
       cryptoAmount,
       priceUSD,
