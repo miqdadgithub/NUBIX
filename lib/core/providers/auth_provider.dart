@@ -42,12 +42,14 @@ class AuthProvider extends ChangeNotifier {
   Future<AuthOtpChallenge?> signInWithPhone(String phoneNumber) async {
     _setLoading(true);
     try {
+      _pendingOtp = null;
       final challenge = await _authService.signInWithPhone(phoneNumber);
       _pendingOtp = challenge;
       _clearError();
       return challenge;
     } catch (e) {
       _setError(_formatError(e));
+      _pendingOtp = null;
       return null;
     } finally {
       _setLoading(false);

@@ -268,13 +268,28 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     
     final phoneNumber = '$_selectedCountryCode${_phoneController.text.trim()}';
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     final challenge = await authProvider.signInWithPhone(phoneNumber);
 
     if (challenge != null && mounted) {
       final encodedPhone = Uri.encodeComponent(phoneNumber);
       final encodedVerificationId = Uri.encodeComponent(challenge.verificationId);
       context.push('/otp-verification?phone=$encodedPhone&verificationId=$encodedVerificationId');
+      return;
+    }
+
+    if (mounted) {
+      final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            languageProvider.isArabic
+                ? 'تعذّر إرسال رمز التحقق، حاول مرة أخرى'
+                : 'We could not send a verification code. Please try again.',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 }

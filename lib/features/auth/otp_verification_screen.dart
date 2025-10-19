@@ -53,6 +53,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void _startTimer() {
+    _timer?.cancel();
     _start = 60;
     _canResend = false;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -334,33 +335,46 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _resendOTP() async {
-    if (_canResend) {
-      // Clear OTP fields
+    if (!_canResend) {
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final challenge = await authProvider.resendOtp(widget.phoneNumber);
+
+    if (challenge != null && mounted) {
       for (var controller in _otpControllers) {
         controller.clear();
       }
-      
-      // Focus on first field
       _focusNodes[0].requestFocus();
-      
-      // Restart timer
       _startTimer();
+      setState(() {
+        _verificationId = challenge.verificationId;
+      });
 
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final challenge = await authProvider.resendOtp(widget.phoneNumber);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('New verification code sent. OTP: ${challenge.otp}'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      return;
+    }
 
-      if (challenge != null && mounted) {
-        setState(() {
-          _verificationId = challenge.verificationId;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('New verification code sent. OTP: ${challenge.otp}'),
-            backgroundColor: AppColors.success,
+    if (mounted) {
+      setState(() {
+        _canResend = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            Provider.of<LanguageProvider>(context, listen: false).isArabic
+                ? 'تعذّر إرسال الرمز، حاول مرة أخرى'
+                : 'Could not resend the code. Please try again.',
           ),
-        );
-      }
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 }

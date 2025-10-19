@@ -63,6 +63,7 @@ class AuthService {
     _loadUsers();
     _loadPendingOtps();
     _initialized = true;
+    await _pruneExpiredOtps();
   }
 
   Future<void> _ensureInitialized() async {
@@ -104,6 +105,7 @@ class AuthService {
 
   Future<AuthOtpChallenge> signInWithPhone(String phoneNumber) async {
     await _ensureInitialized();
+    await _pruneExpiredOtps();
     await Future.delayed(const Duration(milliseconds: 500));
 
     final random = Random.secure();
@@ -360,6 +362,20 @@ class AuthService {
     await _ensureInitialized();
     final serializable = _pendingOtps.map((key, value) => MapEntry(key, value.toMap()));
     await _prefs!.setString(_otpKey, jsonEncode(serializable));
+  }
+
+  Future<void> _pruneExpiredOtps() async {
+    final expiredKeys = _pendingOtps.entries
+        .where((entry) => entry.value.isExpired)
+        .map((entry) => entry.key)
+        .toList();
+    if (expiredKeys.isEmpty) {
+      return;
+    }
+    for (final key in expiredKeys) {
+      _pendingOtps.remove(key);
+    }
+    await _savePendingOtps();
   }
 }
 
