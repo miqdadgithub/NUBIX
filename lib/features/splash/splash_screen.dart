@@ -80,7 +80,11 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          gradient: LinearGradient(
+            colors: [AppColors.background, AppColors.primary],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
         child: Center(
           child: Column(
@@ -94,8 +98,8 @@ class _SplashScreenState extends State<SplashScreen>
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: const NubixLogo(
-                        size: 120,
-                        color: Colors.white,
+                        size: 124,
+                        showBadge: true,
                       ),
                     ),
                   );
@@ -110,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Column(
                       children: [
                         Text(
-                          'NUBIX',
+                          'NubiX',
                           style: Theme.of(context).textTheme.displayMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -119,7 +123,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Your Gateway to Cryptocurrency',
+                          'Sudan\'s modern crypto companion',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.white70,
                             letterSpacing: 0.5,
@@ -138,7 +142,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.0,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
                   ),
                 ),
               ),
