@@ -20,7 +20,7 @@ const AuthContext = createContext();
 const LanguageContext = createContext();
 
 // API Configuration - MUST use env var only
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 axios.defaults.baseURL = API_BASE_URL;
 
 // Custom Hooks
@@ -126,11 +126,12 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOtp = async (phoneNumber, otp) => {
+  const verifyOtp = async (phoneNumber, otp, verificationId) => {
     try {
       const response = await axios.post('/api/auth/phone/verify-otp', {
         phoneNumber,
-        otp
+        otp,
+        verificationId
       });
       const { token: newToken, user: userData } = response.data;
       setToken(newToken);

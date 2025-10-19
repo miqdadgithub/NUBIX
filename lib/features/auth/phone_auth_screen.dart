@@ -93,31 +93,38 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                 const SizedBox(height: 40),
                 
                 // Development Mode Notice
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.info.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Development Mode',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.info,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    final otpHint = authProvider.pendingOtp?.otp;
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: AppColors.info.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.info.withOpacity(0.3)),
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Use: +249123456789 or +249987654321\nOTP: 123456',
-                        style: TextStyle(fontSize: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Development Mode',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.info,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            otpHint != null
+                                ? 'Latest OTP: $otpHint\nCodes expire after 5 minutes.'
+                                : 'Enter a Sudanese phone number (e.g. +249123456789) to receive a mock OTP.',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 
                 // Phone form
@@ -262,10 +269,12 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
     final phoneNumber = '$_selectedCountryCode${_phoneController.text.trim()}';
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    final success = await authProvider.signInWithPhone(phoneNumber);
-    
-    if (success && mounted) {
-      context.push('/otp-verification?phone=$phoneNumber&verificationId=dev-verification-id');
+    final challenge = await authProvider.signInWithPhone(phoneNumber);
+
+    if (challenge != null && mounted) {
+      final encodedPhone = Uri.encodeComponent(phoneNumber);
+      final encodedVerificationId = Uri.encodeComponent(challenge.verificationId);
+      context.push('/otp-verification?phone=$encodedPhone&verificationId=$encodedVerificationId');
     }
   }
 }

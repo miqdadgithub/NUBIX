@@ -3,19 +3,31 @@ import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
+    final baseScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: AppColors.primary,
+      onPrimary: AppColors.onPrimary,
+      secondary: AppColors.secondary,
+      onSecondary: AppColors.onSecondary,
+      background: AppColors.background,
+      surface: AppColors.surface,
+      onSurface: AppColors.onSurface,
+      outline: AppColors.outline,
+    );
+
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        brightness: Brightness.light,
-      ),
+      colorScheme: baseScheme,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.onSurface,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
+        scrolledUnderElevation: 0,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -76,12 +88,26 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       cardTheme: CardTheme(
-        elevation: 2,
+        elevation: 4,
+        shadowColor: AppColors.primary.withOpacity(0.08),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         color: AppColors.surface,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
       ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceVariant,
+        selectedColor: AppColors.secondary.withOpacity(0.15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        labelStyle: const TextStyle(
+          color: AppColors.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      dividerColor: AppColors.outline,
       textTheme: const TextTheme(
         displayLarge: TextStyle(
           fontSize: 32,
@@ -154,6 +180,10 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.dark,
+      ).copyWith(
+        background: AppColors.darkBackground,
+        surface: AppColors.darkSurface,
+        onSurface: AppColors.darkOnSurface,
       ),
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.darkBackground,

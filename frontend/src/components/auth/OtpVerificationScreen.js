@@ -6,18 +6,20 @@ import { MessageSquare, ArrowLeft, AlertCircle } from 'lucide-react';
 const OtpVerificationScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { verifyOtp } = useAuth();
+  const { verifyOtp, phoneAuth } = useAuth();
   const { t } = useLanguage();
 
   const phoneNumber = searchParams.get('phone') || '';
-  const verificationId = searchParams.get('verificationId') || '';
-  const devOtp = searchParams.get('devOtp') || '';
+  const initialVerificationId = searchParams.get('verificationId') || '';
+  const initialDevOtp = searchParams.get('devOtp') || '';
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [currentVerificationId, setCurrentVerificationId] = useState(initialVerificationId);
+  const [devOtp, setDevOtp] = useState(initialDevOtp);
 
   const inputRefs = useRef([]);
 
@@ -55,7 +57,13 @@ const OtpVerificationScreen = () => {
     }
     setLoading(true);
     setError('');
-    const result = await verifyOtp(phoneNumber, otpToVerify);
+    if (!currentVerificationId) {
+      setError(t('Missing verification ID. Please request a new code.'));
+      setLoading(false);
+      return;
+    }
+
+    const result = await verifyOtp(phoneNumber, otpToVerify, currentVerificationId);
     if (result.success) {
       navigate('/home');
     } else {
@@ -64,12 +72,19 @@ const OtpVerificationScreen = () => {
     setLoading(false);
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (canResend) {
       setTimer(60);
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
+      const result = await phoneAuth(phoneNumber);
+      if (result.success) {
+        setCurrentVerificationId(result.verificationId);
+        setDevOtp(result.developmentOtp || '');
+      } else if (result.error) {
+        setError(result.error);
+      }
     }
   };
 
