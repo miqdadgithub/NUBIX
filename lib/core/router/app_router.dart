@@ -76,12 +76,16 @@ class AppRouter {
   static String? _handleRedirect(BuildContext context, GoRouterState state) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final currentLocation = state.matchedLocation;
-    
+
     // Don't redirect during splash screen
     if (currentLocation == '/splash') {
       return null;
     }
-    
+
+    if (!authProvider.isInitialized) {
+      return '/splash';
+    }
+
     // Public routes that don't require authentication
     final publicRoutes = [
       '/onboarding',

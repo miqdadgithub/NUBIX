@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 
 enum KycStatus {
   notStarted,
@@ -79,29 +79,25 @@ class UserModel {
     this.usedMonthlyLimit = 0.0,
   });
   
-  factory UserModel.fromFirebaseUser(User user) {
-    return UserModel(
-      id: user.uid,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified,
-      createdAt: user.metadata.creationTime,
-      lastSignIn: user.metadata.lastSignInTime,
-    );
-  }
-  
   factory UserModel.fromMap(Map<String, dynamic> map) {
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is DateTime) return value;
+      if (value is String && value.isNotEmpty) {
+        return DateTime.tryParse(value);
+      }
+      return null;
+    }
+
     return UserModel(
-      id: map['id'] ?? '',
+      id: map['id'] ?? map['email'] ?? '',
       email: map['email'],
       phoneNumber: map['phoneNumber'],
       displayName: map['displayName'],
       photoURL: map['photoURL'],
       emailVerified: map['emailVerified'] ?? false,
-      createdAt: map['createdAt']?.toDate(),
-      lastSignIn: map['lastSignIn']?.toDate(),
+      createdAt: parseDate(map['createdAt']),
+      lastSignIn: parseDate(map['lastSignIn']),
       kycStatus: KycStatus.values.firstWhere(
         (e) => e.name == map['kycStatus'],
         orElse: () => KycStatus.notStarted,
@@ -110,8 +106,8 @@ class UserModel {
         (e) => e.name == map['kycTier'],
         orElse: () => KycTier.none,
       ),
-      kycSubmittedAt: map['kycSubmittedAt']?.toDate(),
-      kycApprovedAt: map['kycApprovedAt']?.toDate(),
+      kycSubmittedAt: parseDate(map['kycSubmittedAt']),
+      kycApprovedAt: parseDate(map['kycApprovedAt']),
       kycRejectionReason: map['kycRejectionReason'],
       fullName: map['fullName'],
       dateOfBirth: map['dateOfBirth'],
@@ -137,12 +133,12 @@ class UserModel {
       'displayName': displayName,
       'photoURL': photoURL,
       'emailVerified': emailVerified,
-      'createdAt': createdAt,
-      'lastSignIn': lastSignIn,
+      'createdAt': createdAt?.toIso8601String(),
+      'lastSignIn': lastSignIn?.toIso8601String(),
       'kycStatus': kycStatus.name,
       'kycTier': kycTier.name,
-      'kycSubmittedAt': kycSubmittedAt,
-      'kycApprovedAt': kycApprovedAt,
+      'kycSubmittedAt': kycSubmittedAt?.toIso8601String(),
+      'kycApprovedAt': kycApprovedAt?.toIso8601String(),
       'kycRejectionReason': kycRejectionReason,
       'fullName': fullName,
       'dateOfBirth': dateOfBirth,
@@ -158,6 +154,13 @@ class UserModel {
       'usedDailyLimit': usedDailyLimit,
       'usedMonthlyLimit': usedMonthlyLimit,
     };
+  }
+
+  String toJson() => jsonEncode(toMap());
+
+  factory UserModel.fromJson(String source) {
+    final data = jsonDecode(source) as Map<String, dynamic>;
+    return UserModel.fromMap(data);
   }
   
   UserModel copyWith({

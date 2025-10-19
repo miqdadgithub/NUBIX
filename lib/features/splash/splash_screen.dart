@@ -51,11 +51,14 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateAfterDelay() {
-    Future.delayed(const Duration(seconds: 3), () {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    Future.wait([
+      Future.delayed(const Duration(seconds: 2)),
+      authProvider.initialization,
+    ]).then((_) {
       if (!mounted) return;
-      
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       if (authProvider.isAuthenticated) {
         context.go('/home');
       } else if (authProvider.isFirstTime) {

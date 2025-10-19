@@ -27,14 +27,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     (index) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
-  
+
   Timer? _timer;
   int _start = 60;
   bool _canResend = false;
+  late String _verificationId;
 
   @override
   void initState() {
     super.initState();
+    _verificationId = widget.verificationId;
     _startTimer();
   }
 
@@ -146,22 +148,29 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 const SizedBox(height: 40),
                 
                 // Development Mode Notice
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.info.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    'Development Mode: Use OTP 123456',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.info,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    final otpHint = authProvider.pendingOtp?.otp;
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: AppColors.info.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.info.withOpacity(0.3)),
+                      ),
+                      child: Text(
+                        otpHint != null
+                            ? 'Development Mode: OTP $otpHint (expires in 5 minutes)'
+                            : 'Development Mode: Request a new OTP to continue',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.info,
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  },
                 ),
                 
                 // OTP Input fields
@@ -317,14 +326,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    final success = await authProvider.verifyOTP(widget.verificationId, otp);
-    
+    final success = await authProvider.verifyOTP(_verificationId, otp);
+
     if (success && mounted) {
       context.go('/home');
     }
   }
 
-  void _resendOTP() {
+  Future<void> _resendOTP() async {
     if (_canResend) {
       // Clear OTP fields
       for (var controller in _otpControllers) {
@@ -336,14 +345,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       
       // Restart timer
       _startTimer();
-      
-      // In a real app, you would call the API to resend OTP here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Verification code sent again'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final challenge = await authProvider.resendOtp(widget.phoneNumber);
+
+      if (challenge != null && mounted) {
+        setState(() {
+          _verificationId = challenge.verificationId;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('New verification code sent. OTP: ${challenge.otp}'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
     }
   }
 }
