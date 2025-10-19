@@ -335,46 +335,29 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _resendOTP() async {
-    if (!_canResend) {
-      return;
-    }
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final challenge = await authProvider.resendOtp(widget.phoneNumber);
-
-    if (challenge != null && mounted) {
+    if (_canResend) {
+      // Clear OTP fields
       for (var controller in _otpControllers) {
         controller.clear();
       }
       _focusNodes[0].requestFocus();
       _startTimer();
-      setState(() {
-        _verificationId = challenge.verificationId;
-      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('New verification code sent. OTP: ${challenge.otp}'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-      return;
-    }
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final challenge = await authProvider.resendOtp(widget.phoneNumber);
 
-    if (mounted) {
-      setState(() {
-        _canResend = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            Provider.of<LanguageProvider>(context, listen: false).isArabic
-                ? 'تعذّر إرسال الرمز، حاول مرة أخرى'
-                : 'Could not resend the code. Please try again.',
+      if (challenge != null && mounted) {
+        setState(() {
+          _verificationId = challenge.verificationId;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('New verification code sent. OTP: ${challenge.otp}'),
+            backgroundColor: AppColors.success,
           ),
-          backgroundColor: AppColors.error,
-        ),
-      );
+        );
+      }
     }
   }
 }

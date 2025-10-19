@@ -42,14 +42,12 @@ class AuthProvider extends ChangeNotifier {
   Future<AuthOtpChallenge?> signInWithPhone(String phoneNumber) async {
     _setLoading(true);
     try {
-      _pendingOtp = null;
       final challenge = await _authService.signInWithPhone(phoneNumber);
       _pendingOtp = challenge;
       _clearError();
       return challenge;
     } catch (e) {
       _setError(_formatError(e));
-      _pendingOtp = null;
       return null;
     } finally {
       _setLoading(false);
@@ -92,7 +90,6 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = await _authService.signInWithEmail(email, password);
       _user = user;
-      _pendingOtp = null;
       _clearError();
       return true;
     } catch (e) {
@@ -108,7 +105,6 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = await _authService.registerWithEmail(email, password, fullName);
       _user = user;
-      _pendingOtp = null;
       _clearError();
       return true;
     } catch (e) {

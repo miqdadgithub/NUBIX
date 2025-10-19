@@ -52,18 +52,12 @@ class AuthService {
   SharedPreferences? _prefs;
   bool _initialized = false;
 
-  static bool isDevelopmentMode() {
-    const bool isProductMode = bool.fromEnvironment('dart.vm.product');
-    return !isProductMode;
-  }
-
   Future<void> initialize() async {
     if (_initialized) return;
     _prefs = await SharedPreferences.getInstance();
     _loadUsers();
     _loadPendingOtps();
     _initialized = true;
-    await _pruneExpiredOtps();
   }
 
   Future<void> _ensureInitialized() async {
@@ -105,7 +99,6 @@ class AuthService {
 
   Future<AuthOtpChallenge> signInWithPhone(String phoneNumber) async {
     await _ensureInitialized();
-    await _pruneExpiredOtps();
     await Future.delayed(const Duration(milliseconds: 500));
 
     final random = Random.secure();
@@ -168,30 +161,23 @@ class AuthService {
         'email': email,
         'password': 'temp123',
         'fullName': 'Phone User',
-        'displayName': 'Phone User',
         'phoneNumber': challenge.phoneNumber,
         'kycStatus': 'not_started',
         'balance': 0.0,
         'createdAt': now,
       };
-      _users[email] = Map<String, dynamic>.from(matchedUser!);
+      _users[email] = matchedUser!;
     }
 
-    final normalizedUser = Map<String, dynamic>.from(matchedUser!);
-    normalizedUser['email'] = matchedEmail ?? normalizedUser['email'];
-    normalizedUser['displayName'] =
-        normalizedUser['displayName'] ?? normalizedUser['fullName'] ?? 'NubiX Trader';
-    normalizedUser['fullName'] =
-        normalizedUser['fullName'] ?? normalizedUser['displayName'];
-    normalizedUser['lastSignIn'] = now;
+    matchedUser!['lastSignIn'] = now;
     _pendingOtps.remove(verificationId);
 
-    _users[normalizedUser['email'] as String] = normalizedUser;
+    matchedUser!['email'] = matchedEmail ?? matchedUser!['email'];
 
     await _saveUsers();
     await _savePendingOtps();
 
-    final user = UserModel.fromMap(normalizedUser);
+    final user = UserModel.fromMap(matchedUser!);
     await persistUser(user);
     return user;
   }
@@ -209,8 +195,6 @@ class AuthService {
       throw Exception('Invalid password');
     }
 
-    userData['displayName'] = userData['displayName'] ?? userData['fullName'];
-    userData['fullName'] = userData['fullName'] ?? userData['displayName'];
     userData['lastSignIn'] = DateTime.now().toIso8601String();
     await _saveUsers();
 
@@ -238,7 +222,6 @@ class AuthService {
       'email': email,
       'password': password,
       'fullName': fullName,
-      'displayName': fullName,
       'phoneNumber': '',
       'kycStatus': 'not_started',
       'balance': 0.0,
@@ -277,7 +260,6 @@ class AuthService {
       'email': 'test@nubix.com',
       'password': '123456',
       'fullName': 'Test User',
-      'displayName': 'Test User',
       'phoneNumber': '+249123456789',
       'kycStatus': 'pending',
       'balance': 0.0,
@@ -288,7 +270,6 @@ class AuthService {
       'email': 'admin@nubix.com',
       'password': 'admin123',
       'fullName': 'Admin User',
-      'displayName': 'Admin User',
       'phoneNumber': '+249987654321',
       'kycStatus': 'approved',
       'balance': 50000.0,
@@ -312,12 +293,7 @@ class AuthService {
       final decoded = jsonDecode(stored) as Map<String, dynamic>;
       decoded.forEach((key, value) {
         if (value is Map<String, dynamic>) {
-          final normalized = Map<String, dynamic>.from(value);
-          normalized['displayName'] =
-              normalized['displayName'] ?? normalized['fullName'] ?? 'NubiX Trader';
-          normalized['fullName'] =
-              normalized['fullName'] ?? normalized['displayName'];
-          _users[key] = normalized;
+          _users[key] = Map<String, dynamic>.from(value);
         }
       });
     } catch (_) {
@@ -330,8 +306,6 @@ class AuthService {
     final serializable = _users.map((key, value) {
       final copy = Map<String, dynamic>.from(value);
       copy['email'] = copy['email'] ?? key;
-      copy['displayName'] = copy['displayName'] ?? copy['fullName'];
-      copy['fullName'] = copy['fullName'] ?? copy['displayName'];
       return MapEntry(key, copy);
     });
     await _prefs!.setString(_usersKey, jsonEncode(serializable));
@@ -363,19 +337,4 @@ class AuthService {
     final serializable = _pendingOtps.map((key, value) => MapEntry(key, value.toMap()));
     await _prefs!.setString(_otpKey, jsonEncode(serializable));
   }
-
-  Future<void> _pruneExpiredOtps() async {
-    final expiredKeys = _pendingOtps.entries
-        .where((entry) => entry.value.isExpired)
-        .map((entry) => entry.key)
-        .toList();
-    if (expiredKeys.isEmpty) {
-      return;
-    }
-    for (final key in expiredKeys) {
-      _pendingOtps.remove(key);
-    }
-    await _savePendingOtps();
-  }
 }
-
