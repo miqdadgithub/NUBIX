@@ -60,8 +60,8 @@ const PhoneAuthScreen = () => {
             <span className="text-secondary-800 font-medium">Development Mode</span>
           </div>
           <div className="mt-2 text-sm text-secondary-700">
-            <p>Use: +249123456789 or +249987654321</p>
-            <p>OTP: 123456</p>
+            <p>Enter a Sudanese number (e.g. +249123456789).</p>
+            <p>The mock API returns the verification code alongside the ID so you can complete the flow without SMS.</p>
           </div>
         </div>
       </div>

@@ -59,15 +59,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(isArabic),
-      floatingActionButton: _selectedIndex == 0 ? FloatingActionButton.extended(
-        onPressed: () => _showBuyDialog(context),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text(
-          isArabic ? 'شراء' : 'Buy',
-          style: const TextStyle(color: Colors.white),
-        ),
-      ) : null,
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => _showBuyDialog(context),
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.onSecondary,
+              icon: const Icon(Icons.add, color: AppColors.onSecondary),
+              label: Text(
+                isArabic ? 'شراء' : 'Buy',
+                style: const TextStyle(color: AppColors.onSecondary),
+              ),
+            )
+          : null,
     );
   }
 
@@ -98,71 +101,127 @@ class _HomeScreenState extends State<HomeScreen> {
           Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               final user = authProvider.user;
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isArabic 
-                            ? 'مرحباً، ${user?.displayName ?? 'مستخدم'}!'
-                            : 'Welcome, ${user?.displayName ?? 'User'}!',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        isArabic 
-                            ? 'ابدأ رحلتك في عالم العملات المشفرة'
-                            : 'Start your cryptocurrency journey',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: AppColors.sunriseGradient,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.12),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -40,
+                      right: -30,
+                      child: Container(
+                        width: 120,
+                        height: 120,
                         decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    isArabic ? 'الرصيد الإجمالي' : 'Total Balance',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'SDG 0.00',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(
-                              Icons.account_balance_wallet,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                          ],
+                          color: Colors.white.withOpacity(0.08),
+                          shape: BoxShape.circle,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isArabic
+                                      ? 'مرحباً، ${user?.displayName ?? 'مستخدم'}!'
+                                      : 'Welcome, ${user?.displayName ?? 'User'}!',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        color: AppColors.onPrimary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  isArabic
+                                      ? 'متابعتك تعني الكثير لنا. استمر في بناء محفظتك بخطوات واثقة'
+                                      : 'We\'re glad to see you back. Build your portfolio with confidence.',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                ),
+                                const SizedBox(height: 24),
+                                Container(
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.18),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              isArabic
+                                                  ? 'الرصيد التجريبي'
+                                                  : 'Demo balance',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            const Text(
+                                              'SDG 0.00',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.15),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.show_chart,
+                                          color: Colors.white,
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 24),
+                          const NubixLogo(
+                            size: 88,
+                            showBadge: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -180,26 +239,35 @@ class _HomeScreenState extends State<HomeScreen> {
           
           const SizedBox(height: 16),
           
-          Row(
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              Expanded(
-                child: _buildActionCard(
-                  context,
-                  isArabic ? 'شراء' : 'Buy',
-                  Icons.add_circle,
-                  AppColors.success,
-                  () => _showBuyDialog(context),
-                ),
+              _buildActionButton(
+                context,
+                title: isArabic ? 'شراء' : 'Buy',
+                icon: Icons.trending_up,
+                gradient: AppColors.primaryGradient,
+                onTap: () => _showBuyDialog(context),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildActionCard(
-                  context,
-                  isArabic ? 'إيداع' : 'Deposit',
-                  Icons.account_balance,
-                  AppColors.primary,
-                  () => _showDepositDialog(context),
+              _buildActionButton(
+                context,
+                title: isArabic ? 'دليل نوبكس' : 'NubiX Academy',
+                icon: Icons.auto_stories,
+                gradient: AppColors.goldGradient,
+                onTap: () => _showAcademySheet(context, isArabic),
+              ),
+              _buildActionButton(
+                context,
+                title: isArabic ? 'خريطة الطريق' : 'Roadmap',
+                icon: Icons.map_outlined,
+                gradient: const LinearGradient(
+                  colors: [AppColors.surface, AppColors.surfaceVariant],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                foregroundColor: AppColors.onSurface,
+                onTap: () => _showRoadmapSheet(context, isArabic),
               ),
             ],
           ),
@@ -291,30 +359,71 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildActionCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Icon(icon, size: 32, color: color),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+  Widget _buildActionButton(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required LinearGradient gradient,
+    required VoidCallback onTap,
+    Color? foregroundColor,
+  }) {
+    final textColor = foregroundColor ?? Colors.white;
+    final iconAccent = foregroundColor ?? Colors.white;
+    final iconBackground = foregroundColor == null
+        ? Colors.white.withOpacity(0.2)
+        : AppColors.secondary.withOpacity(0.2);
+    final double width = (MediaQuery.of(context).size.width - 32 - 12) / 2;
+
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(20),
+              border: foregroundColor != null
+                  ? Border.all(color: AppColors.outline)
+                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: (foregroundColor ?? gradient.colors.last)
+                      .withOpacity(foregroundColor == null ? 0.18 : 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
                 ),
-              ),
-            ],
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 24, color: iconAccent),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w700,
+                      ) ??
+                      TextStyle(
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -392,10 +501,264 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showAcademySheet(BuildContext context, bool isArabic) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.auto_stories, color: AppColors.primary),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    isArabic ? 'دليل نوبكس' : 'NubiX Academy',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                isArabic
+                    ? 'اطلع على أساسيات العملات المشفرة، وتعرف على كيفية حماية حسابك، واستكشف ما نعمل عليه قبل الإطلاق الرسمي.'
+                    : 'Dive into crypto fundamentals, understand how we keep your account secure, and see what is coming next before the official launch.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 20),
+              ...[
+                _buildAcademyBullet(
+                  context,
+                  icon: Icons.verified_user,
+                  title: isArabic ? 'إرشادات الأمان' : 'Security walkthroughs',
+                  subtitle: isArabic
+                      ? 'تعرف على المصادقة الثنائية، حماية OTP، وكيفية الإبلاغ عن أي نشاط مشبوه.'
+                      : 'Learn about 2FA, OTP safety, and how to flag unusual activity.',
+                ),
+                _buildAcademyBullet(
+                  context,
+                  icon: Icons.payments_outlined,
+                  title: isArabic ? 'رحلة الدفع المحلية' : 'Local payment journey',
+                  subtitle: isArabic
+                      ? 'خطوات ربط حساب بنك الخرطوم والتكامل القادم مع بنكك.'
+                      : 'Steps for linking Bank of Khartoum accounts and the upcoming Bankak integration.',
+                ),
+                _buildAcademyBullet(
+                  context,
+                  icon: Icons.rocket_launch,
+                  title: isArabic ? 'ابدأ بثقة' : 'Start confidently',
+                  subtitle: isArabic
+                      ? 'نصائح لتكوين محفظتك الأولى باستخدام أرصدة تجريبية قبل تفعيل التداول الحقيقي.'
+                      : 'Tips for building your first portfolio with demo balances before live trading goes live.',
+                ),
+              ],
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(isArabic ? 'تم' : 'Got it'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAcademyBullet(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.secondary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRoadmapSheet(BuildContext context, bool isArabic) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) {
+        final milestones = [
+          _RoadmapMilestone(
+            title: isArabic ? 'تكامل بنكك' : 'Bankak integration',
+            description: isArabic
+                ? 'واجهات برمجية رسمية لربط حسابك في بنك الخرطوم وتعبئة رصيدك فورياً.'
+                : 'Official APIs to link your Bank of Khartoum account for instant top-ups.',
+            quarter: 'Q3',
+          ),
+          _RoadmapMilestone(
+            title: isArabic ? 'توثيق الهوية (KYC)' : 'Identity verification',
+            description: isArabic
+                ? 'رحلة تحقق مبسطة بدعم المستندات المحلية والتقاط الهوية عبر الهاتف.'
+                : 'Streamlined KYC with local document support and in-app ID capture.',
+            quarter: 'Q4',
+          ),
+          _RoadmapMilestone(
+            title: isArabic ? 'التداول المباشر' : 'Live trading',
+            description: isArabic
+                ? 'أوامر فورية، أسعار متدفقه، وإدارة محافظ متقدمة مع تنبيهات ذكية.'
+                : 'Instant orders, streaming prices, and advanced portfolio tools with smart alerts.',
+            quarter: 'Q1',
+          ),
+        ];
+
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.map_outlined, color: AppColors.primary),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    isArabic ? 'خريطة الطريق' : 'Roadmap',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              ...milestones
+                  .map((milestone) => _buildMilestoneTile(context, milestone, isArabic))
+                  .toList(),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(isArabic ? 'إغلاق' : 'Close'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMilestoneTile(
+    BuildContext context,
+    _RoadmapMilestone milestone,
+    bool isArabic,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              milestone.quarter,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  milestone.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  milestone.description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showBuyDialog(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     final isArabic = languageProvider.isArabic;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -433,29 +796,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  void _showDepositDialog(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-    final isArabic = languageProvider.isArabic;
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isArabic ? 'إيداع الأموال' : 'Deposit Funds'),
-        content: Text(
-          isArabic 
-              ? 'ستتمكن قريباً من إيداع الأموال من حسابك المصرفي في بنك الخرطوم'
-              : 'You will soon be able to deposit funds from your Bank of Khartoum account',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(isArabic ? 'حسناً' : 'OK'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class CryptoPrice {
@@ -473,5 +813,17 @@ class CryptoPrice {
     required this.change24h,
     required this.icon,
     required this.color,
+  });
+}
+
+class _RoadmapMilestone {
+  final String title;
+  final String description;
+  final String quarter;
+
+  const _RoadmapMilestone({
+    required this.title,
+    required this.description,
+    required this.quarter,
   });
 }

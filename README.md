@@ -1,135 +1,76 @@
-# NUBIX Flutter App
+# NUBIX MVP Workspace
 
-A comprehensive cryptocurrency trading application built for Sudanese users, enabling purchases with Sudanese Pounds (SDG) through Khartoum Bank's Bankak payment channel and Binance integration.
+This repository contains the current minimum viable product for the NUBIX experience:
 
-## 🚀 Features
+- A **Flutter** mobile client that runs completely offline with a mock authentication layer. User onboarding and sessions are persisted with `SharedPreferences` so returning users bypass the introduction screens.
+- A **FastAPI** backend that exposes mock authentication, KYC and trading endpoints backed by a JSON data store with bcrypt-hashed passwords. One-time-password challenges return verification IDs and development codes so the Flutter and React clients can complete the flow without Firebase.
+- A **React** web client that talks to the FastAPI service. The application reads `REACT_APP_BACKEND_URL` but falls back to `http://localhost:8001`, so local development works without additional configuration.
 
-- **Multi-Language Support**: Arabic (RTL) and English
-- **Secure Authentication**: Phone, Email, 2FA, Biometric
-- **KYC Integration**: Sumsub/Onfido with automated verification
-- **Bank Integration**: Khartoum Bank/Bankak API + OCR fallback
-- **Cryptocurrency Trading**: Binance integration with real-time data
-- **Custodial Wallet**: Hot/cold storage with Cloud KMS
-- **Low Bandwidth Optimized**: Efficient for challenging network conditions
+The codebase is intentionally scoped to showcase the product journey while making it easy to understand where real integrations still need to be added.
 
-## 🏗️ Architecture
+## Project structure
 
-- **Frontend**: Flutter (Android primary, iOS-ready)
-- **Backend**: Firebase (Auth, Firestore, Cloud Functions, Storage)
-- **Security**: Google Cloud KMS, HMAC webhooks, TLS 1.3
-- **Exchange**: Binance API with adapter pattern
-- **KYC**: Sumsub/Onfido via webhooks
-
-## 📱 Core Screens
-
-1. **Splash & Onboarding**: Language selection, app introduction
-2. **Authentication**: Phone/email registration, OTP, 2FA, biometric
-3. **Home**: Balance display, portfolio, BUY CTA
-4. **Buy Flow**: Coin selection, amount input, price calculator
-5. **Deposits**: Bank instructions, Bankak deep-link, receipt upload
-6. **KYC**: Document upload, selfie capture, status tracking
-7. **Profile**: Security settings, transaction history, support
-
-## 🔐 Security Features
-
-- Multi-layer authentication system
-- JWT tokens with automatic revocation
-- HMAC-signed webhooks
-- Certificate pinning
-- PII redaction in logs
-- Regular security audits
-
-## 💰 Fee Structure
-
-- **Default**: 0.75% of purchase amount + SDG 50 processing fee
-- **Configurable**: Admin controls for per-coin and transaction type fees
-
-## 🌍 Localization
-
-- Complete Arabic RTL support
-- Number formatting for Arabic locales
-- Date/time formatting
-- Currency display in Arabic numerals
-
-## 📊 KYC Tiers
-
-- **Level 1 (Basic)**: Daily limit SDG 5,000
-- **Level 2 (Enhanced)**: Monthly limit SDG 100,000
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Flutter SDK 3.10.0+
-- Dart SDK 3.0.0+
-- Android Studio / VS Code
-- Firebase project setup
-- Binance API credentials
-- Bankak API credentials
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies: `flutter pub get`
-3. Configure Firebase: `flutterfire configure`
-4. Set up environment variables
-5. Run the app: `flutter run`
-
-### Environment Setup
-
-Create `.env` file with:
 ```
-BINANCE_API_KEY=your_binance_api_key
-BINANCE_SECRET_KEY=your_binance_secret
-BANKA_API_KEY=your_bankak_api_key
-BANKA_SECRET=your_bankak_secret
-SUMSUB_API_KEY=your_sumsub_api_key
-FIREBASE_PROJECT_ID=your_firebase_project_id
+backend/      FastAPI mock API with persisted JSON storage
+frontend/     React client that consumes the mock API
+lib/          Flutter application source code
+pubspec.yaml  Flutter dependencies (Firebase removed in favour of local mocks)
 ```
 
-## 🧪 Testing
+## Backend (FastAPI)
 
-- **Unit Tests**: `flutter test`
-- **Widget Tests**: `flutter test test/widget_test/`
-- **Integration Tests**: `flutter test integration_test/`
-- **E2E Tests**: Complete user journey testing
+The API is a mock-only service. Data is stored in `backend/data_store.json`, so restarting the server keeps registered users, generated OTPs, quotes, orders, inbox threads and KYC submissions.
 
-## 📈 Monitoring
+### Running locally
 
-- Daily active users and transaction volume
-- KYC approval rates and processing times
-- Deposit success rates and time-to-credit
-- Order execution success rates
-- API response times and error rates
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
+pip install -r requirements.txt
+uvicorn server:app --reload --host 0.0.0.0 --port 8001
+```
 
-## 🔄 CI/CD
+### Default credentials and OTPs
 
-- Automated testing on PR creation
-- Security scans and code quality checks
-- Staged deployment (dev → staging → production)
-- Firebase deployment automation
-- APK signing and Play Store deployment
+| Type        | Details                                   |
+|-------------|-------------------------------------------|
+| Email login | `test@nubix.com` / `123456`               |
+| Admin login | `admin@nubix.com` / `admin123`            |
+| Phone auth  | Any `+249` number. OTP is returned by API |
 
-## 📋 Compliance
+When you request a phone OTP (`/api/auth/phone/send-otp`) the response contains `verificationId`, `developmentOtp` and `expiresAt`. Send all three values to `/api/auth/phone/verify-otp` to complete the mock login.
 
-- Data protection with AES-256 encryption
-- GDPR-compliant data handling
-- Transaction monitoring and reporting
-- Suspicious activity flagging
-- Regulatory reporting capabilities
+## Flutter mobile client
 
-## 🎯 Success Metrics
+Key behaviours:
 
-- Closed beta (200-500 users) with 95%+ successful trades
-- KYC automation handling 90%+ of clean documents
-- Webhook deposits auto-crediting within 120 seconds
-- Zero P0 security findings in penetration test
-- Admin panel fully functional for operations team
+- All Firebase packages were removed. `lib/core/services/auth_service.dart` now returns concrete `UserModel` instances from an in-app mock repository instead of `null` Firebase users.
+- OTP requests return verification IDs that are passed through the router. Resend requests generate new IDs and development codes.
+- Onboarding completion and authenticated sessions are saved with `SharedPreferences`. Relaunching the app skips onboarding when appropriate and restores the last signed-in user.
 
-## 📞 Support
+To run the Flutter app:
 
-For technical support or integration questions, contact the development team.
+```bash
+flutter pub get
+flutter run  # Choose your preferred device
+```
 
-## 📄 License
+## React web client
 
-This project is proprietary software. All rights reserved.
+The web client automatically targets the FastAPI backend at `http://localhost:8001`. To point to another host, create a `.env` file based on `.env.example` inside `frontend/`.
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+## Known limitations
+
+- Authentication, KYC, trading and messaging endpoints are mock implementations designed for demos only.
+- Cryptocurrency prices are generated locally; there is no real exchange integration.
+- File uploads are accepted but not stored. KYC approvals are simulated.
+- There is no production-ready database. The JSON file is intended for development use.
+
+These constraints are documented here and in `RUNNING_STATUS.md` to set accurate expectations for stakeholders.

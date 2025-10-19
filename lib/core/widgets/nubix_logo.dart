@@ -3,112 +3,137 @@ import '../theme/app_colors.dart';
 
 class NubixLogo extends StatelessWidget {
   final double size;
-  final Color? color;
   final bool showText;
+  final bool showBadge;
 
   const NubixLogo({
     Key? key,
-    this.size = 60,
-    this.color,
+    this.size = 72,
     this.showText = false,
+    this.showBadge = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final logoColor = color ?? AppColors.primary;
-    
+    final logoMark = SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _NubixMarkPainter(showBadge: showBadge),
+        size: Size.square(size),
+      ),
+    );
+
+    if (!showText) {
+      return logoMark;
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                logoColor,
-                logoColor.withOpacity(0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(size * 0.2),
-            boxShadow: [
-              BoxShadow(
-                color: logoColor.withOpacity(0.3),
-                blurRadius: size * 0.1,
-                offset: Offset(0, size * 0.05),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Background pattern
-              CustomPaint(
-                size: Size(size * 0.8, size * 0.8),
-                painter: NubixLogoPainter(color: Colors.white.withOpacity(0.2)),
-              ),
-              // Main logo
-              Text(
-                'N',
-                style: TextStyle(
-                  fontSize: size * 0.5,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+        logoMark,
+        SizedBox(height: size * 0.15),
+        Text(
+          'NubiX',
+          style: TextStyle(
+            fontSize: size * 0.32,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
+            letterSpacing: 1.1,
           ),
         ),
-        if (showText) ...[
-          const SizedBox(height: 8),
-          Text(
-            'NUBIX',
-            style: TextStyle(
-              fontSize: size * 0.25,
-              fontWeight: FontWeight.bold,
-              color: logoColor,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
       ],
     );
   }
 }
 
-class NubixLogoPainter extends CustomPainter {
-  final Color color;
+class _NubixMarkPainter extends CustomPainter {
+  final bool showBadge;
 
-  NubixLogoPainter({required this.color});
+  _NubixMarkPainter({required this.showBadge});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
+    final double stroke = size.width * 0.14;
 
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 4;
+    final badgePaint = Paint()
+      ..color = AppColors.background
+      ..style = PaintingStyle.fill;
 
-    // Draw crypto-inspired geometric pattern
-    for (int i = 0; i < 6; i++) {
-      final angle = (i * 60) * (3.14159 / 180);
-      final x = center.dx + radius * math.cos(angle);
-      final y = center.dy + radius * math.sin(angle);
-      
-      canvas.drawLine(center, Offset(x, y), paint);
+    if (showBadge) {
+      final rect = RRect.fromRectAndRadius(
+        Offset.zero & size,
+        Radius.circular(size.width * 0.14),
+      );
+      canvas.drawRRect(rect, badgePaint);
+
+      final shadowPaint = Paint()
+        ..color = AppColors.primary.withOpacity(0.08)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      canvas.drawRRect(rect.shift(const Offset(0, 2)), shadowPaint);
     }
-    
-    // Draw outer circle
-    canvas.drawCircle(center, radius * 1.2, paint);
+
+    final inset = showBadge ? size.width * 0.16 : 0;
+    final usable = size.width - (inset * 2);
+    final origin = Offset(inset, inset);
+
+    canvas.save();
+    canvas.translate(origin.dx, origin.dy);
+
+    final goldPaint = Paint()
+      ..color = AppColors.secondary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final navyPaint = Paint()
+      ..color = AppColors.primary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke * 0.72
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final Path goldPath = Path()
+      ..moveTo(usable * 0.1, usable * 0.95)
+      ..lineTo(usable * 0.1, usable * 0.12)
+      ..lineTo(usable * 0.46, usable * 0.58)
+      ..lineTo(usable * 0.46, usable * 0.08)
+      ..lineTo(usable * 0.92, usable * 0.92);
+
+    canvas.drawPath(goldPath, goldPaint);
+
+    final Path navyPath = Path()
+      ..moveTo(usable * 0.32, usable * 0.92)
+      ..lineTo(usable * 0.32, usable * 0.48)
+      ..lineTo(usable * 0.66, usable * 0.88)
+      ..lineTo(usable * 0.66, usable * 0.34)
+      ..lineTo(usable * 0.84, usable * 0.54);
+
+    canvas.drawPath(navyPath, navyPaint);
+
+    final Path arrowStem = Path()
+      ..moveTo(usable * 0.66, usable * 0.24)
+      ..lineTo(usable * 0.66, usable * 0.04)
+      ..lineTo(usable * 0.9, usable * 0.04);
+
+    canvas.drawPath(arrowStem, navyPaint);
+
+    final Path arrowHead = Path()
+      ..moveTo(usable * 0.9, usable * 0.04)
+      ..lineTo(usable * 0.9, usable * 0.28)
+      ..lineTo(usable * 0.78, usable * 0.16)
+      ..close();
+
+    final arrowPaint = Paint()
+      ..color = AppColors.primary
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(arrowHead, arrowPaint);
+
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
-// Import for math functions
-import 'dart:math' as math;

@@ -302,20 +302,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _selectLanguageAndContinue(String languageCode) {
+  Future<void> _selectLanguageAndContinue(String languageCode) async {
     final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     // Set selected language
     if (languageCode == 'ar') {
-      languageProvider.setArabic();
+      await languageProvider.setArabic();
     } else {
-      languageProvider.setEnglish();
+      await languageProvider.setEnglish();
     }
     
     // Mark onboarding as complete
-    authProvider.setFirstTimeComplete();
-    
+    await authProvider.setFirstTimeComplete();
+
     // Navigate to login
     context.go('/login');
   }
