@@ -53,6 +53,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void _startTimer() {
+    _timer?.cancel();
     _start = 60;
     _canResend = false;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -339,11 +340,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       for (var controller in _otpControllers) {
         controller.clear();
       }
-      
-      // Focus on first field
       _focusNodes[0].requestFocus();
-      
-      // Restart timer
       _startTimer();
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);

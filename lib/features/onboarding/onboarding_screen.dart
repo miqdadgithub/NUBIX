@@ -308,9 +308,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     
     // Set selected language
     if (languageCode == 'ar') {
-      languageProvider.setArabic();
+      await languageProvider.setArabic();
     } else {
-      languageProvider.setEnglish();
+      await languageProvider.setEnglish();
     }
     
     // Mark onboarding as complete
