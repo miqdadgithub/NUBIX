@@ -302,7 +302,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _selectLanguageAndContinue(String languageCode) {
+  Future<void> _selectLanguageAndContinue(String languageCode) async {
     final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
@@ -314,8 +314,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     
     // Mark onboarding as complete
-    authProvider.setFirstTimeComplete();
-    
+    await authProvider.setFirstTimeComplete();
+
     // Navigate to login
     context.go('/login');
   }

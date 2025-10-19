@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 import os
+import json
+from pathlib import Path
 from datetime import datetime, timedelta
 import jwt
 import bcrypt
-from pymongo import MongoClient
 import uuid
 import random
 
@@ -20,11 +21,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-# MongoDB connection (not used in mock, but kept for future)
-MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
-client = MongoClient(MONGO_URL)
-db = client.nubix_db
 
 # JWT secret
 JWT_SECRET = os.getenv('JWT_SECRET', 'nubix-secret-key-2024')
@@ -48,6 +44,7 @@ class PhoneAuth(BaseModel):
 class OTPVerification(BaseModel):
     phoneNumber: str
     otp: str
+    verificationId: str
 
 class QuoteRequest(BaseModel):
     symbol: str
@@ -63,26 +60,125 @@ class ConfirmPaymentRequest(BaseModel):
     reference: Optional[str] = None
 
 # ========================
-# Mock Data
+# Data persistence
 # ========================
-MOCK_USERS: Dict[str, Dict[str, Any]] = {
-    "test@nubix.com": {
-        "password": "123456",  # Plain text for development
-        "fullName": "Test User",
-        "phoneNumber": "+249123456789",
-        "kycStatus": "pending",
-        "balance": 0.0,
-        "createdAt": "2024-01-01T00:00:00Z"
-    },
-    "admin@nubix.com": {
-        "password": "admin123",  # Plain text for development
-        "fullName": "Admin User",
-        "phoneNumber": "+249987654321",
-        "kycStatus": "approved",
-        "balance": 50000.0,
-        "createdAt": "2024-01-01T00:00:00Z"
+
+DATA_FILE = Path(os.getenv('NUBIX_DATA_FILE', Path(__file__).with_name('data_store.json')))
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except ValueError:
+        return False
+
+
+def _looks_hashed(value: str) -> bool:
+    return value.startswith('$2') and len(value) > 20
+
+
+def _default_users() -> Dict[str, Dict[str, Any]]:
+    base_timestamp = "2024-01-01T00:00:00Z"
+    return {
+        "test@nubix.com": {
+            "id": "user-test",
+            "email": "test@nubix.com",
+            "password": hash_password("123456"),
+            "fullName": "Test User",
+            "phoneNumber": "+249123456789",
+            "kycStatus": "pending",
+            "balance": 0.0,
+            "createdAt": base_timestamp,
+            "lastLogin": base_timestamp,
+        },
+        "admin@nubix.com": {
+            "id": "user-admin",
+            "email": "admin@nubix.com",
+            "password": hash_password("admin123"),
+            "fullName": "Admin User",
+            "phoneNumber": "+249987654321",
+            "kycStatus": "approved",
+            "balance": 50000.0,
+            "createdAt": base_timestamp,
+            "lastLogin": base_timestamp,
+        },
     }
-}
+
+
+def _default_data() -> Dict[str, Any]:
+    return {
+        "users": _default_users(),
+        "quotes": {},
+        "orders": {},
+        "kyc": {},
+        "inbox": {},
+        "pendingOtps": {},
+    }
+
+
+def _load_data() -> Dict[str, Any]:
+    data = _default_data()
+    if DATA_FILE.exists():
+        try:
+            with DATA_FILE.open('r', encoding='utf-8') as f:
+                loaded = json.load(f)
+            if isinstance(loaded, dict):
+                for key in data.keys():
+                    if key in loaded and isinstance(loaded[key], dict):
+                        data[key] = loaded[key]
+        except Exception:
+            pass
+
+    users = data.get("users", {})
+    for email, info in list(users.items()):
+        password = info.get("password")
+        if isinstance(password, str) and not _looks_hashed(password):
+            info["password"] = hash_password(password)
+        info.setdefault("email", email)
+        info.setdefault("id", f"user-{uuid.uuid4()}")
+        info.setdefault("createdAt", datetime.utcnow().isoformat())
+    data["users"] = users
+    data.setdefault("quotes", {})
+    data.setdefault("orders", {})
+    data.setdefault("kyc", {})
+    data.setdefault("inbox", {})
+    data.setdefault("pendingOtps", {})
+    return data
+
+
+def _save_data(payload: Dict[str, Any]) -> None:
+    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with DATA_FILE.open('w', encoding='utf-8') as f:
+        json.dump(payload, f, indent=2)
+
+
+DATA = _load_data()
+MOCK_USERS: Dict[str, Dict[str, Any]] = DATA["users"]
+QUOTES: Dict[str, Dict[str, Any]] = DATA["quotes"]
+ORDERS: Dict[str, Dict[str, Any]] = DATA["orders"]
+KYC_DATA: Dict[str, Dict[str, Any]] = DATA["kyc"]
+INBOX_THREADS: Dict[str, Dict[str, Any]] = DATA["inbox"]
+PENDING_OTPS: Dict[str, Dict[str, Any]] = DATA["pendingOtps"]
+
+
+def save_data() -> None:
+    _save_data({
+        "users": MOCK_USERS,
+        "quotes": QUOTES,
+        "orders": ORDERS,
+        "kyc": KYC_DATA,
+        "inbox": INBOX_THREADS,
+        "pendingOtps": PENDING_OTPS,
+    })
+
+
+# Ensure the storage file exists with the normalized defaults
+save_data()
+
 
 BASE_COINS = [
     ("BTC", "Bitcoin"), ("ETH", "Ethereum"), ("BNB", "Binance Coin"), ("ADA", "Cardano"), ("XRP", "XRP"),
@@ -94,19 +190,6 @@ BASE_COINS = [
 ICON_MAP = {"BTC": "₿", "ETH": "Ξ", "BNB": "⬡", "ADA": "₳", "XRP": "X", "LTC": "Ł", "DOT": "●", "LINK": "🔗", "XLM": "🌟", "SOL": "◎", "DOGE": "Ð", "ATOM": "⚛"}
 
 USD_TO_SDG = 4000
-
-# In-memory stores (MVP)
-QUOTES: Dict[str, Dict[str, Any]] = {}
-ORDERS: Dict[str, Dict[str, Any]] = {}
-KYC_DATA: Dict[str, Dict[str, Any]] = {}
-INBOX_THREADS: Dict[str, Dict[str, Any]] = {}
-
-# ========================
-# Helpers
-# ========================
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def create_jwt_token(email: str) -> str:
     payload = {"email": email, "exp": datetime.utcnow() + timedelta(days=30)}
@@ -133,14 +216,19 @@ async def health_check():
 async def register_user(user_data: UserRegistration):
     if user_data.email in MOCK_USERS:
         raise HTTPException(status_code=400, detail="User already exists")
+    timestamp = datetime.utcnow().isoformat()
     MOCK_USERS[user_data.email] = {
-        "password": user_data.password,  # For dev only
+        "id": f"user-{uuid.uuid4()}",
+        "email": user_data.email,
+        "password": hash_password(user_data.password),
         "fullName": user_data.fullName,
         "phoneNumber": user_data.phoneNumber,
         "kycStatus": "not_started",
         "balance": 0.0,
-        "createdAt": datetime.utcnow().isoformat()
+        "createdAt": timestamp,
+        "lastLogin": timestamp,
     }
+    save_data()
     token = create_jwt_token(user_data.email)
     return {
         "message": "Registration successful",
@@ -157,8 +245,10 @@ async def register_user(user_data: UserRegistration):
 @app.post("/api/auth/login")
 async def login_user(user_data: UserLogin):
     user = MOCK_USERS.get(user_data.email)
-    if not user or user.get("password") != user_data.password:
+    if not user or not verify_password(user_data.password, user.get("password", "")):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    user["lastLogin"] = datetime.utcnow().isoformat()
+    save_data()
     token = create_jwt_token(user_data.email)
     return {
         "message": "Login successful",
@@ -174,45 +264,85 @@ async def login_user(user_data: UserLogin):
 
 @app.post("/api/auth/phone/send-otp")
 async def send_phone_otp(phone_data: PhoneAuth):
-    test_numbers = ["+249123456789", "+249987654321"]
-    if phone_data.phoneNumber not in test_numbers:
-        raise HTTPException(status_code=400, detail="Invalid phone number for development mode")
+    if not phone_data.phoneNumber.startswith('+'):
+        raise HTTPException(status_code=400, detail="Phone number must include country code")
+    verification_id = str(uuid.uuid4())
+    otp = f"{random.randint(100000, 999999):06d}"
+    expires_at = (datetime.utcnow() + timedelta(minutes=5)).isoformat()
+    PENDING_OTPS[verification_id] = {
+        "phoneNumber": phone_data.phoneNumber,
+        "otp": otp,
+        "expiresAt": expires_at,
+    }
+    save_data()
     return {
         "message": "OTP sent successfully",
-        "verificationId": "dev-verification-id",
-        "developmentOtp": "123456"
+        "verificationId": verification_id,
+        "developmentOtp": otp,
+        "expiresAt": expires_at,
     }
 
 @app.post("/api/auth/phone/verify-otp")
 async def verify_phone_otp(otp_data: OTPVerification):
-    if otp_data.otp != "123456":
+    pending = PENDING_OTPS.get(otp_data.verificationId)
+    if not pending or pending.get("phoneNumber") != otp_data.phoneNumber:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification request")
+
+    expires_at_str = pending.get("expiresAt")
+    if expires_at_str:
+        try:
+            expires_at = datetime.fromisoformat(expires_at_str)
+            if datetime.utcnow() > expires_at:
+                PENDING_OTPS.pop(otp_data.verificationId, None)
+                save_data()
+                raise HTTPException(status_code=400, detail="Verification code expired")
+        except ValueError:
+            pass
+
+    if pending.get("otp") != otp_data.otp:
         raise HTTPException(status_code=400, detail="Invalid OTP")
-    phone_user = None
+
+    PENDING_OTPS.pop(otp_data.verificationId, None)
+
+    phone_user_email = None
+    user_record = None
     for email, user in MOCK_USERS.items():
         if user.get("phoneNumber") == otp_data.phoneNumber:
-            phone_user = {"email": email, **user}
+            phone_user_email = email
+            user_record = user
             break
-    if not phone_user:
-        email = f"user_{otp_data.phoneNumber.replace('+', '').replace(' ', '')}@nubix.com"
-        MOCK_USERS[email] = {
-            "password": "temp123",
+
+    now_iso = datetime.utcnow().isoformat()
+
+    if not user_record:
+        phone_user_email = f"user_{otp_data.phoneNumber.replace('+', '').replace(' ', '')}@nubix.com"
+        user_record = {
+            "id": f"user-{uuid.uuid4()}",
+            "email": phone_user_email,
+            "password": hash_password("temp123"),
             "fullName": "Phone User",
             "phoneNumber": otp_data.phoneNumber,
             "kycStatus": "not_started",
             "balance": 0.0,
-            "createdAt": datetime.utcnow().isoformat()
+            "createdAt": now_iso,
+            "lastLogin": now_iso,
         }
-        phone_user = {"email": email, **MOCK_USERS[email]}
-    token = create_jwt_token(phone_user["email"])
+        MOCK_USERS[phone_user_email] = user_record
+    else:
+        user_record["lastLogin"] = now_iso
+
+    save_data()
+
+    token = create_jwt_token(phone_user_email)
     return {
         "message": "Phone verification successful",
         "token": token,
         "user": {
-            "email": phone_user["email"],
-            "fullName": phone_user["fullName"],
-            "phoneNumber": phone_user["phoneNumber"],
-            "kycStatus": phone_user.get("kycStatus", "not_started"),
-            "balance": phone_user.get("balance", 0.0)
+            "email": phone_user_email,
+            "fullName": user_record.get("fullName", "Phone User"),
+            "phoneNumber": user_record.get("phoneNumber"),
+            "kycStatus": user_record.get("kycStatus", "not_started"),
+            "balance": user_record.get("balance", 0.0)
         }
     }
 
@@ -307,6 +437,7 @@ async def create_quote(req: QuoteRequest, request: Request):
         "totalUSD": totalUSD,
         "expiresAt": (datetime.utcnow() + timedelta(minutes=3)).isoformat()
     }
+    save_data()
     return {"quote": QUOTES[quote_id], "slippage": 0.2}
 
 @app.post("/api/orders/create")
@@ -344,6 +475,7 @@ async def create_order(req: CreateOrderRequest, request: Request):
             "reference": reference
         }
     }
+    save_data()
     return {"order": ORDERS[order_id]}
 
 @app.post("/api/orders/confirm-payment")
@@ -361,6 +493,7 @@ async def confirm_payment(req: ConfirmPaymentRequest, request: Request):
     # Immediately complete for MVP
     order["status"] = "COMPLETED"
     order["completedAt"] = datetime.utcnow().isoformat()
+    save_data()
     return {"order": order}
 
 @app.get("/api/orders/{order_id}")
@@ -400,6 +533,7 @@ async def kyc_submit_basic(request: Request, fullName: str = Form(...), dob: str
     # Update user status if exists
     if email in MOCK_USERS:
         MOCK_USERS[email]["kycStatus"] = "under_review"
+    save_data()
     return {"message": "KYC basic submitted", "status": "under_review"}
 
 @app.post("/api/kyc/upload")
@@ -411,6 +545,7 @@ async def kyc_upload(email: str = Form(...), fileType: str = Form(...), file: Up
     entry["files"] = files
     entry["updatedAt"] = datetime.utcnow().isoformat()
     KYC_DATA[email] = entry
+    save_data()
     return {"message": "File received", "files": files}
 
 @app.get("/api/kyc/status")
@@ -424,6 +559,7 @@ async def kyc_status(email: str):
         entry["status"] = "verified"
         if email in MOCK_USERS:
             MOCK_USERS[email]["kycStatus"] = "approved"
+    save_data()
     return {"status": entry["status"], "submittedAt": entry.get("submittedAt"), "updatedAt": entry.get("updatedAt")}
 
 # ========================
@@ -453,6 +589,7 @@ async def inbox_create_thread(request: Request, subject: str = Form(...), catego
     INBOX_THREADS[tid] = {"id": tid, "user": email, "subject": subject, "category": category, "messages": [
         {"id": str(uuid.uuid4()), "from": "system", "text": "Thanks for contacting Nubix. We'll get back to you shortly.", "createdAt": datetime.utcnow().isoformat()}
     ]}
+    save_data()
     return {"thread": INBOX_THREADS[tid]}
 
 @app.post("/api/inbox/threads/{thread_id}/messages")
@@ -468,6 +605,7 @@ async def inbox_post_message(thread_id: str, request: Request, text: str = Form(
         raise HTTPException(status_code=404, detail="Thread not found")
     msg = {"id": str(uuid.uuid4()), "from": email, "text": text, "createdAt": datetime.utcnow().isoformat()}
     thread["messages"].append(msg)
+    save_data()
     return {"message": msg}
 
 if __name__ == "__main__":
