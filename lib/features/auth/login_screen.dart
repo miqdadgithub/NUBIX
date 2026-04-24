@@ -188,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text(isArabic ? 'تذكرني' : 'Remember me'),
                           const Spacer(),
                           TextButton(
-                            onPressed: () => _showForgotPasswordDialog(),
+                            onPressed: () => context.push('/forgot-password'),
                             child: Text(
                               isArabic ? 'نسيت كلمة المرور؟' : 'Forgot Password?',
                             ),
@@ -313,64 +313,4 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _showForgotPasswordDialog() {
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-    final isArabic = languageProvider.isArabic;
-    
-    showDialog(
-      context: context,
-      builder: (context) {
-        final emailController = TextEditingController();
-        
-        return AlertDialog(
-          title: Text(isArabic ? 'إعادة تعيين كلمة المرور' : 'Reset Password'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                isArabic 
-                    ? 'سنرسل لك رابط إعادة تعيين كلمة المرور'
-                    : 'We will send you a password reset link',
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: isArabic ? 'البريد الإلكتروني' : 'Email',
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(isArabic ? 'إلغاء' : 'Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (emailController.text.isNotEmpty) {
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                  await authProvider.resetPassword(emailController.text);
-                  if (mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isArabic 
-                              ? 'تم إرسال رابط إعادة التعيين'
-                              : 'Reset link sent to your email',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: Text(isArabic ? 'إرسال' : 'Send'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
