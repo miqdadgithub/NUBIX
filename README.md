@@ -8,6 +8,68 @@ This repository contains the current minimum viable product for the NUBIX experi
 
 The codebase is intentionally scoped to showcase the product journey while making it easy to understand where real integrations still need to be added.
 
+## One-command install + configure + run
+
+If you haven't cloned yet:
+
+```bash
+git clone <your-repo-url> "$HOME/NUBIX"
+```
+
+Then run this single command (auto-detects the repo path):
+
+```bash
+bash -lc '
+set -e
+
+# Repo path detection:
+# 1) current directory, 2) $HOME/NUBIX, 3) parent directories from current path
+REPO_DIR=""
+if [ -f "./backend/requirements.txt" ] && [ -d "./frontend" ]; then
+  REPO_DIR="$(pwd)"
+elif [ -f "$HOME/NUBIX/backend/requirements.txt" ] && [ -d "$HOME/NUBIX/frontend" ]; then
+  REPO_DIR="$HOME/NUBIX"
+else
+  SEARCH_DIR="$(pwd)"
+  while [ "$SEARCH_DIR" != "/" ]; do
+    if [ -f "$SEARCH_DIR/backend/requirements.txt" ] && [ -d "$SEARCH_DIR/frontend" ]; then
+      REPO_DIR="$SEARCH_DIR"
+      break
+    fi
+    SEARCH_DIR="$(dirname "$SEARCH_DIR")"
+  done
+fi
+
+if [ -z "$REPO_DIR" ]; then
+  echo "Could not find repository root (missing backend/requirements.txt and frontend/)."
+  echo "Run this command from inside the NUBIX repo or clone into $HOME/NUBIX."
+  exit 1
+fi
+
+cd "$REPO_DIR"
+
+python3 -m venv backend/.venv
+source backend/.venv/bin/activate
+pip install -r backend/requirements.txt
+
+cd frontend
+npm install
+printf "REACT_APP_BACKEND_URL=http://localhost:8001\n" > .env
+cd ..
+
+(cd backend && source .venv/bin/activate && uvicorn server:app --host 0.0.0.0 --port 8001 --reload) &
+(cd frontend && npm start)
+'
+```
+
+Notes:
+- Backend will run on `http://localhost:8001`.
+- Frontend will run on `http://localhost:3000`.
+- If you also want to run Flutter, open a second terminal and run:
+  ```bash
+  flutter pub get && flutter run
+  ```
+
 ## Project structure
 
 ```

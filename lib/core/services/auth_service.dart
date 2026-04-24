@@ -45,9 +45,12 @@ class AuthService {
   static const _sessionKey = 'nubix_current_user';
   static const _usersKey = 'nubix_mock_users';
   static const _otpKey = 'nubix_pending_otps';
+  static const _resetAttemptsKey = 'nubix_reset_attempts';
 
   final Map<String, Map<String, dynamic>> _users = {};
   final Map<String, AuthOtpChallenge> _pendingOtps = {};
+  final Map<String, List<DateTime>> _resetAttempts = {};
+  final Map<String, String> _pendingPasswordResets = {};
 
   SharedPreferences? _prefs;
   bool _initialized = false;
@@ -57,6 +60,7 @@ class AuthService {
     _prefs = await SharedPreferences.getInstance();
     _loadUsers();
     _loadPendingOtps();
+    _loadResetAttempts();
     _initialized = true;
   }
 
@@ -100,19 +104,9 @@ class AuthService {
   Future<AuthOtpChallenge> signInWithPhone(String phoneNumber) async {
     await _ensureInitialized();
     await Future.delayed(const Duration(milliseconds: 500));
+    final challenge = _createOtpChallenge(phoneNumber);
 
-    final random = Random.secure();
-    final verificationId =
-        'mock-${DateTime.now().millisecondsSinceEpoch}-${random.nextInt(1 << 32)}';
-    final otp = (random.nextInt(900000) + 100000).toString();
-    final challenge = AuthOtpChallenge(
-      verificationId: verificationId,
-      phoneNumber: phoneNumber,
-      otp: otp,
-      expiresAt: DateTime.now().add(const Duration(minutes: 5)),
-    );
-
-    _pendingOtps[verificationId] = challenge;
+    _pendingOtps[challenge.verificationId] = challenge;
     await _savePendingOtps();
 
     return challenge;
@@ -250,6 +244,60 @@ class AuthService {
     }
   }
 
+  Future<AuthOtpChallenge> requestPasswordResetOtp(String identifier) async {
+    await _ensureInitialized();
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final normalizedIdentifier = identifier.trim().toLowerCase();
+    final matchedEmail = _resolveIdentifierToEmail(normalizedIdentifier);
+    if (matchedEmail == null) {
+      throw Exception('No account found. Please check and try again.');
+    }
+
+    final now = DateTime.now();
+    final attempts = _resetAttempts.putIfAbsent(matchedEmail, () => <DateTime>[]);
+    attempts.removeWhere((attempt) => now.difference(attempt) > const Duration(minutes: 10));
+    if (attempts.length >= 3) {
+      throw Exception('Too many attempts. Please wait 10 minutes and try again.');
+    }
+
+    attempts.add(now);
+    await _saveResetAttempts();
+
+    final challenge = _createOtpChallenge(normalizedIdentifier);
+    _pendingOtps[challenge.verificationId] = challenge;
+    _pendingPasswordResets[challenge.verificationId] = matchedEmail;
+    await _savePendingOtps();
+    return challenge;
+  }
+
+  Future<void> verifyPasswordResetOtp(String verificationId, String otp) async {
+    await _ensureInitialized();
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final challenge = _pendingOtps[verificationId];
+    final targetEmail = _pendingPasswordResets[verificationId];
+
+    if (challenge == null || targetEmail == null) {
+      throw Exception('Verification expired. Please request a new code.');
+    }
+
+    if (challenge.isExpired) {
+      _pendingOtps.remove(verificationId);
+      _pendingPasswordResets.remove(verificationId);
+      await _savePendingOtps();
+      throw Exception('The verification code has expired.');
+    }
+
+    if (challenge.otp != otp) {
+      throw Exception('Invalid verification code.');
+    }
+
+    _pendingOtps.remove(verificationId);
+    _pendingPasswordResets.remove(verificationId);
+    await _savePendingOtps();
+  }
+
   static List<String> getDevelopmentEmails() {
     return _defaultUsers.keys.toList();
   }
@@ -336,5 +384,63 @@ class AuthService {
     await _ensureInitialized();
     final serializable = _pendingOtps.map((key, value) => MapEntry(key, value.toMap()));
     await _prefs!.setString(_otpKey, jsonEncode(serializable));
+  }
+
+  String? _resolveIdentifierToEmail(String identifier) {
+    if (_users.containsKey(identifier)) {
+      return identifier;
+    }
+
+    for (final entry in _users.entries) {
+      final phoneNumber =
+          (entry.value['phoneNumber'] as String?)?.trim().toLowerCase() ?? '';
+      if (phoneNumber.isNotEmpty && phoneNumber == identifier) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
+  AuthOtpChallenge _createOtpChallenge(String destination) {
+    final random = Random.secure();
+    final verificationId =
+        'mock-${DateTime.now().millisecondsSinceEpoch}-${random.nextInt(1 << 32)}';
+    final otp = (random.nextInt(900000) + 100000).toString();
+    return AuthOtpChallenge(
+      verificationId: verificationId,
+      phoneNumber: destination,
+      otp: otp,
+      expiresAt: DateTime.now().add(const Duration(minutes: 5)),
+    );
+  }
+
+  void _loadResetAttempts() {
+    final stored = _prefs!.getString(_resetAttemptsKey);
+    if (stored == null) {
+      return;
+    }
+    try {
+      final decoded = jsonDecode(stored) as Map<String, dynamic>;
+      decoded.forEach((key, value) {
+        if (value is List) {
+          _resetAttempts[key] = value
+              .whereType<String>()
+              .map(DateTime.parse)
+              .where((timestamp) =>
+                  DateTime.now().difference(timestamp) <= const Duration(minutes: 10))
+              .toList();
+        }
+      });
+    } catch (_) {
+      // Ignore corrupt data.
+    }
+  }
+
+  Future<void> _saveResetAttempts() async {
+    await _ensureInitialized();
+    final serializable = _resetAttempts.map(
+      (key, value) => MapEntry(key, value.map((item) => item.toIso8601String()).toList()),
+    );
+    await _prefs!.setString(_resetAttemptsKey, jsonEncode(serializable));
   }
 }

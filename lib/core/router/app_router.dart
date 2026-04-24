@@ -8,8 +8,11 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/register_screen.dart';
 import '../../features/auth/phone_auth_screen.dart';
 import '../../features/auth/otp_verification_screen.dart';
+import '../../features/auth/forgot_password_screen.dart';
+import '../../features/auth/forgot_password_success_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/profile/profile_screen.dart';
+import '../../features/kyc/kyc_selfie_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -52,11 +55,23 @@ class AppRouter {
         builder: (context, state) {
           final phoneNumber = state.uri.queryParameters['phone'] ?? '';
           final verificationId = state.uri.queryParameters['verificationId'] ?? '';
+          final mode = state.uri.queryParameters['mode'] ?? 'auth';
           return OtpVerificationScreen(
             phoneNumber: phoneNumber,
             verificationId: verificationId,
+            mode: mode,
           );
         },
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password-success',
+        name: 'forgot-password-success',
+        builder: (context, state) => const ForgotPasswordSuccessScreen(),
       ),
       
       // Main App Routes (Protected)
@@ -69,6 +84,11 @@ class AppRouter {
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/kyc-selfie',
+        name: 'kyc-selfie',
+        builder: (context, state) => const KycSelfieScreen(),
       ),
     ],
   );
@@ -93,6 +113,8 @@ class AppRouter {
       '/register', 
       '/phone-auth',
       '/otp-verification',
+      '/forgot-password',
+      '/forgot-password-success',
     ];
     
     final isPublicRoute = publicRoutes.contains(currentLocation);

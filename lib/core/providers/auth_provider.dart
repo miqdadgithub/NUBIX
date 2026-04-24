@@ -143,6 +143,36 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<AuthOtpChallenge?> requestPasswordResetOtp(String identifier) async {
+    _setLoading(true);
+    try {
+      final challenge = await _authService.requestPasswordResetOtp(identifier);
+      _pendingOtp = challenge;
+      _clearError();
+      return challenge;
+    } catch (e) {
+      _setError(_formatError(e));
+      return null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> verifyPasswordResetOtp(String verificationId, String otp) async {
+    _setLoading(true);
+    try {
+      await _authService.verifyPasswordResetOtp(verificationId, otp);
+      _pendingOtp = null;
+      _clearError();
+      return true;
+    } catch (e) {
+      _setError(_formatError(e));
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> setFirstTimeComplete() async {
     await _authService.setOnboardingComplete();
     _isFirstTime = false;

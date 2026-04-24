@@ -10,11 +10,13 @@ import '../../core/widgets/nubix_logo.dart';
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
+  final String mode;
 
   const OtpVerificationScreen({
     Key? key,
     required this.phoneNumber,
     required this.verificationId,
+    this.mode = 'auth',
   }) : super(key: key);
 
   @override
@@ -114,7 +116,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 
                 // Title
                 Text(
-                  isArabic ? 'أدخل رمز التحقق' : 'Enter Verification Code',
+                  widget.mode == 'reset'
+                      ? 'Verify reset code'
+                      : (isArabic ? 'أدخل رمز التحقق' : 'Enter Verification Code'),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -131,9 +135,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ),
                     children: [
                       TextSpan(
-                        text: isArabic 
-                            ? 'لقد أرسلنا رمز التحقق إلى '
-                            : 'We sent a verification code to ',
+                        text: widget.mode == 'reset'
+                            ? 'We sent a reset code to '
+                            : (isArabic
+                                ? 'لقد أرسلنا رمز التحقق إلى '
+                                : 'We sent a verification code to '),
                       ),
                       TextSpan(
                         text: widget.phoneNumber,
@@ -327,10 +333,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    final success = await authProvider.verifyOTP(_verificationId, otp);
+    final success = widget.mode == 'reset'
+        ? await authProvider.verifyPasswordResetOtp(_verificationId, otp)
+        : await authProvider.verifyOTP(_verificationId, otp);
 
     if (success && mounted) {
-      context.go('/home');
+      context.go(widget.mode == 'reset' ? '/forgot-password-success' : '/kyc-selfie');
     }
   }
 
@@ -344,7 +352,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       _startTimer();
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final challenge = await authProvider.resendOtp(widget.phoneNumber);
+      final challenge = widget.mode == 'reset'
+          ? await authProvider.requestPasswordResetOtp(widget.phoneNumber)
+          : await authProvider.resendOtp(widget.phoneNumber);
 
       if (challenge != null && mounted) {
         setState(() {
