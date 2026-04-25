@@ -1,0 +1,8 @@
+node_modules/
+*.zip
+encoded.txt
+.cache/
+.local/
+artifacts/
+attached_assets/
+public/project.zip

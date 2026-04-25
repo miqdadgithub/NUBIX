@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "8Q_LvUeu-OaOhPJF4-jWN"
+uri = "file://artifacts/nubix/assets/images/icon.png"
+type = "image"
+title = "nubix navy gold N icon"
